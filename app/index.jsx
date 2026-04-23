@@ -5,11 +5,14 @@ export default function Index() {
     <View
       style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        // justifyContent: "center",
+        // alignItems: "center",
       }}
     >
-      <Text>JnU Hall</Text>
+      <Text style={{
+        fontFamily:'outfit-bold',
+        fontSize:40
+      }}>JnU Hall</Text>
     </View>
   );
 }
