@@ -17,7 +17,7 @@ export default function DueList() {
   useEffect(() => { fetchDue(); }, []);
 
   const markPaid = async (id) => {
-    Alert.alert("Confirm", "Paid mark করবে?", [
+    Alert.alert("Confirm", "Mark as paid?", [
       { text: "Cancel" },
       {
         text: "Yes", onPress: async () => {
@@ -37,12 +37,12 @@ export default function DueList() {
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}><Text style={styles.backText}>← Back</Text></TouchableOpacity>
         <Text style={styles.title}>📋 Due List</Text>
-        <Text style={styles.count}>মোট বাকি: {dueList.length} জন</Text>
+        <Text style={styles.count}>Total Due: {dueList.length} students</Text>
       </View>
       {loading ? <ActivityIndicator size="large" color="#e74c3c" style={{ marginTop: 40 }} /> :
         <FlatList data={dueList} keyExtractor={item => item._id}
           contentContainerStyle={{ padding: 16 }}
-          ListEmptyComponent={<Text style={styles.empty}>✅ সবাই payment করেছে!</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>✅ All students have made payments!</Text>}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.row}>
@@ -50,7 +50,7 @@ export default function DueList() {
                   <Text style={styles.sName}>{item.studentName}</Text>
                   <Text style={styles.sId}>{item.studentId}</Text>
                   <Text style={styles.semester}>{item.semester}</Text>
-                  <Text style={styles.amount}>বাকি: ৳{item.amount}</Text>
+                  <Text style={styles.amount}>Due: ৳{item.amount}</Text>
                 </View>
                 <TouchableOpacity style={styles.paidBtn} onPress={() => markPaid(item._id)}>
                   <Text style={styles.paidText}>Mark{"\n"}Paid ✓</Text>

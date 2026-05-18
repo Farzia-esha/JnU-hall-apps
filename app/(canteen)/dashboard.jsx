@@ -9,6 +9,7 @@ export default function CanteenDashboard() {
   const menus = [
     { title: "🍽️ Post Menu", route: "/(canteen)/menu", color: "#8e44ad" },
     { title: "💬 Feedback", route: "/(canteen)/feedback", color: "#2980b9" },
+    { title: "🍽️ Today's Menu", route: "/(canteen)/canteen", color: "green" },
   ];
 
   return (

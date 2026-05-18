@@ -14,7 +14,7 @@ export default function AccountantDashboard() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.welcome}>Accountant Panel 💼</Text>
+        <Text style={styles.welcome}>Accountant Panel</Text>
         <Text style={styles.name}>{user?.name}</Text>
       </View>
       <View style={styles.grid}>

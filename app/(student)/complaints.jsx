@@ -26,7 +26,7 @@ export default function Complaints() {
   useEffect(() => { fetchComplaints(); }, []);
 
   const submitComplaint = async () => {
-    if (!title || !description) { Alert.alert("Error", "সব field পূরণ করো"); return; }
+    if (!title || !description) { Alert.alert("Error", "Please fill in all fields"); return; }
     try {
       const res = await fetch(`${BASE_URL}/api/complaints`, {
         method: "POST",
@@ -34,11 +34,11 @@ export default function Complaints() {
         body: JSON.stringify({ title, description, studentEmail: user?.email, studentName: user?.name }),
       });
       if (res.ok) {
-        Alert.alert("Success", "Complaint জমা হয়েছে");
+        Alert.alert("Success", "Complaint submitted successfully");
         setModal(false); setTitle(""); setDescription("");
         fetchComplaints();
       }
-    } catch { Alert.alert("Error", "Submit হয়নি"); }
+    } catch { Alert.alert("Error", "Failed to submit complaint"); }
   };
 
   const statusColor = (s) => s === "resolved" ? "#2ecc71" : s === "in_progress" ? "#f39c12" : "#e74c3c";
@@ -60,7 +60,7 @@ export default function Complaints() {
           data={complaints}
           keyExtractor={item => item._id}
           contentContainerStyle={{ padding: 16 }}
-          ListEmptyComponent={<Text style={styles.empty}>কোনো complaint নেই</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>No complaints found</Text>}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.row}>
@@ -76,9 +76,9 @@ export default function Complaints() {
       <Modal visible={modal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>নতুন Complaint</Text>
-            <TextInput placeholder="বিষয়" style={styles.input} value={title} onChangeText={setTitle} />
-            <TextInput placeholder="বিস্তারিত লেখো..." style={[styles.input, { height: 100 }]}
+            <Text style={styles.modalTitle}>New Complaint</Text>
+            <TextInput placeholder="Subject" style={styles.input} value={title} onChangeText={setTitle} />
+            <TextInput placeholder="Provide details..." style={[styles.input, { height: 100 }]}
               value={description} onChangeText={setDescription} multiline />
             <TouchableOpacity style={styles.submitBtn} onPress={submitComplaint}>
               <Text style={styles.submitText}>Submit</Text>
@@ -96,7 +96,7 @@ export default function Complaints() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f6fa" },
   header: { backgroundColor: "#e74c3c", padding: 20, paddingTop: 50 },
-  backText: { color: "#fff", fontSize: 16, marginBottom: 8 },
+  backText: { color: "#fff", fontSize: 20, marginBottom: 8 },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   title: { color: "#fff", fontSize: 22, fontWeight: "bold" },
   addBtn: { backgroundColor: "#fff", paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },

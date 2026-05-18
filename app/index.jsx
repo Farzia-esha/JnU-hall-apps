@@ -1,4 +1,3 @@
-
 // // import { View, Text, Image, TouchableOpacity } from "react-native";
 // // import { Link } from "expo-router";
 
@@ -137,9 +136,9 @@
 //   );
 // }
 
-import { useEffect } from "react";
-import { View, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "../context/AuthContext";
 
 export default function Index() {
@@ -148,14 +147,26 @@ export default function Index() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { router.replace("/login"); return; }
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
 
     switch (user.role) {
-      case "admin": router.replace("/(admin)/dashboard"); break;
-      case "accountant": router.replace("/(accountant)/dashboard"); break;
-      case "canteen_manager": router.replace("/(canteen)/dashboard"); break;
-      case "hall_rep": router.replace("/(hallrep)/dashboard"); break;
-      default: router.replace("/(student)/dashboard");
+      case "admin":
+        router.replace("/(admin)/dashboard");
+        break;
+      case "accountant":
+        router.replace("/(accountant)/dashboard");
+        break;
+      case "canteen_manager":
+        router.replace("/(canteen)/dashboard");
+        break;
+      case "hall_rep":
+        router.replace("/(hallrep)/dashboard");
+        break;
+      default:
+        router.replace("/(student)/dashboard");
     }
   }, [user, loading]);
 

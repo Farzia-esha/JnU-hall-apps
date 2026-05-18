@@ -13,7 +13,7 @@ export default function AddStudent() {
 
   const handleSubmit = async () => {
     if (!form.name || !form.email || !form.studentId) {
-      Alert.alert("Error", "নাম, email এবং Student ID আবশ্যক"); return;
+      Alert.alert("Error", "Name, email and Student ID are required"); return;
     }
     setLoading(true);
     try {
@@ -22,13 +22,13 @@ export default function AddStudent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (res.ok) { Alert.alert("Success", "Student add হয়েছে"); router.back(); }
-    } catch { Alert.alert("Error", "Add হয়নি"); }
+      if (res.ok) { Alert.alert("Success", "Student added successfully"); router.back(); }
+    } catch { Alert.alert("Error", "Add failed"); }
     finally { setLoading(false); }
   };
 
   const fields = [
-    { key: "name", label: "নাম *" },
+    { key: "name", label: "Name *" },
     { key: "email", label: "Email *" },
     { key: "studentId", label: "Student ID *" },
     { key: "department", label: "Department" },
@@ -63,12 +63,12 @@ export default function AddStudent() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f6fa" },
-  header: { backgroundColor: "#2c3e50", padding: 20, paddingTop: 50 },
-  backText: { color: "#fff", fontSize: 16, marginBottom: 8 },
+  header: { backgroundColor: "purple", padding: 20, paddingTop: 50 },
+  backText: { color: "#fff", fontSize: 25, marginBottom: 8 },
   title: { color: "#fff", fontSize: 22, fontWeight: "bold" },
   form: { padding: 16 },
   label: { fontSize: 14, color: "#555", marginBottom: 4, marginTop: 8 },
   input: { backgroundColor: "#fff", borderRadius: 10, padding: 12, borderWidth: 1, borderColor: "#ddd", fontSize: 15 },
-  btn: { backgroundColor: "#2ecc71", padding: 16, borderRadius: 10, alignItems: "center", marginTop: 24, marginBottom: 40 },
+  btn: { backgroundColor: "purple", padding: 16, borderRadius: 10, alignItems: "center", marginTop: 24, marginBottom: 40 },
   btnText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 });

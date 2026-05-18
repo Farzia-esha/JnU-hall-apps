@@ -27,7 +27,7 @@ export default function Payments() {
 
   const addPayment = async () => {
     if (!form.studentId || !form.amount || !form.semester) {
-      Alert.alert("Error", "Student ID, Amount এবং Semester আবশ্যক"); return;
+      Alert.alert("Error", "Student ID, Amount & Semester are required"); return;
     }
     const res = await fetch(`${BASE_URL}/api/payments`, {
       method: "POST",
@@ -41,7 +41,7 @@ export default function Payments() {
       }),
     });
     if (res.ok) {
-      Alert.alert("Success", "Payment record হয়েছে");
+      Alert.alert("Success", "Payment record added successfully");
       setModal(false);
       setForm({ studentId: "", studentName: "", amount: "", semester: "", status: "unpaid", scholarshipAmount: "0" });
       fetchPayments();
@@ -74,7 +74,7 @@ export default function Payments() {
       {loading ? <ActivityIndicator size="large" color="#27ae60" style={{ marginTop: 40 }} /> :
         <FlatList data={payments} keyExtractor={item => item._id}
           contentContainerStyle={{ padding: 16 }}
-          ListEmptyComponent={<Text style={styles.empty}>কোনো payment নেই</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>No payment records found</Text>}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.row}>
@@ -102,10 +102,11 @@ export default function Payments() {
       <Modal visible={modal} animationType="slide" transparent>
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>নতুন Payment</Text>
+            <Text style={styles.modalTitle}>New Payment</Text>
             {[
               { key: "studentId", label: "Student ID *" },
               { key: "studentName", label: "Student Name" },
+              {key:"email",label:"Student Email"},
               { key: "amount", label: "Amount (৳) *", keyboard: "numeric" },
               { key: "semester", label: "Semester * (e.g. 2025-Jan)" },
               { key: "scholarshipAmount", label: "Scholarship Amount (৳)", keyboard: "numeric" },

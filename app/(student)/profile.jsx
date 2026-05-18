@@ -25,12 +25,12 @@ export default function Profile() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>আমার Profile</Text>
+        <Text style={styles.title}>My Profile</Text>
       </View>
 
       <View style={styles.card}>
         {[
-          { label: "নাম", value: profile?.name },
+          { label: "Name", value: profile?.name },
           { label: "Email", value: profile?.email },
           { label: "Student ID", value: profile?.studentId },
           { label: "Department", value: profile?.department },
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: { backgroundColor: "#2e86de", padding: 20, paddingTop: 50 },
   backBtn: { marginBottom: 8 },
-  backText: { color: "#fff", fontSize: 16 },
+  backText: { color: "#fff", fontSize: 20 },
   title: { color: "#fff", fontSize: 22, fontWeight: "bold" },
   card: { margin: 16, backgroundColor: "#fff", borderRadius: 12, padding: 16, elevation: 2 },
   row: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#f0f0f0" },

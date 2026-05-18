@@ -18,7 +18,7 @@ export default function Students() {
   useEffect(() => { fetchStudents(); }, []);
 
   const deleteStudent = (id) => {
-    Alert.alert("Confirm", "এই student delete করবে?", [
+    Alert.alert("Confirm", "Are you sure you want to delete this student?", [
       { text: "Cancel" },
       {
         text: "Delete", style: "destructive", onPress: async () => {
@@ -40,7 +40,7 @@ export default function Students() {
           data={students}
           keyExtractor={item => item._id}
           contentContainerStyle={{ padding: 16 }}
-          ListEmptyComponent={<Text style={styles.empty}>কোনো student নেই</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>No students available</Text>}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.row}>
@@ -62,8 +62,8 @@ export default function Students() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f6fa" },
-  header: { backgroundColor: "#2c3e50", padding: 20, paddingTop: 50 },
-  backText: { color: "#fff", fontSize: 16, marginBottom: 8 },
+  header: { backgroundColor: "purple", padding: 20, paddingTop: 50 },
+  backText: { color: "#fff", fontSize: 25, marginBottom: 8 },
   title: { color: "#fff", fontSize: 22, fontWeight: "bold" },
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2 },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },

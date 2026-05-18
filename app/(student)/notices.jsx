@@ -26,7 +26,7 @@ export default function Notices() {
           data={notices}
           keyExtractor={item => item._id}
           contentContainerStyle={{ padding: 16 }}
-          ListEmptyComponent={<Text style={styles.empty}>কোনো notice নেই</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>No notices found</Text>}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <Text style={styles.noticeTitle}>{item.title}</Text>
@@ -42,7 +42,7 @@ export default function Notices() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f6fa" },
   header: { backgroundColor: "#e67e22", padding: 20, paddingTop: 50 },
-  backText: { color: "#fff", fontSize: 16, marginBottom: 8 },
+  backText: { color: "#fff", fontSize: 20, marginBottom: 8 },
   title: { color: "#fff", fontSize: 22, fontWeight: "bold" },
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2 },
   noticeTitle: { fontSize: 17, fontWeight: "bold", color: "#222", marginBottom: 6 },

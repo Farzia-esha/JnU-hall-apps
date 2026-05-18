@@ -8,9 +8,9 @@ export default function AdminDashboard() {
 
   const menus = [
     { title: "👨‍🎓 Students", route: "/(admin)/students", color: "#3498db" },
-    { title: "➕ Add Student", route: "/(admin)/add-student", color: "#2ecc71" },
+    { title: "➕ Add Student", route: "/(admin)/add-student", color: "green" },
     { title: "📢 Notices", route: "/(admin)/notices", color: "#e67e22" },
-    { title: "📝 Complaints", route: "/(admin)/complaints", color: "#e74c3c" },
+    { title: "📝 Complaints", route: "/(admin)/complaints", color: "purple" },
   ];
 
   return (
@@ -43,5 +43,5 @@ const styles = StyleSheet.create({
   card: { padding: 20, borderRadius: 12, marginBottom: 4 },
   cardText: { color: "#fff", fontSize: 18, fontWeight: "600" },
   logoutBtn: { margin: 16, backgroundColor: "#e74c3c", padding: 14, borderRadius: 10, alignItems: "center" },
-  logoutText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+  logoutText: { color: "#fff", fontWeight: "bold", fontSize: 18 },
 });

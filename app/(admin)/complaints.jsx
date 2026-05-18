@@ -17,7 +17,7 @@ export default function AdminComplaints() {
   useEffect(() => { fetchComplaints(); }, []);
 
   const updateStatus = (id, status) => {
-    Alert.alert("Update", `Status "${status}" করবে?`, [
+    Alert.alert("Update", `Update status to "${status}"?`, [
       { text: "Cancel" },
       {
         text: "Yes", onPress: async () => {
@@ -41,7 +41,7 @@ export default function AdminComplaints() {
       </View>
       {loading ? <ActivityIndicator size="large" color="#e74c3c" style={{ marginTop: 40 }} /> :
         <FlatList data={complaints} keyExtractor={item => item._id} contentContainerStyle={{ padding: 16 }}
-          ListEmptyComponent={<Text style={styles.empty}>কোনো complaint নেই</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>No complaints available</Text>}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.row}>
@@ -66,8 +66,8 @@ export default function AdminComplaints() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f6fa" },
-  header: { backgroundColor: "#2c3e50", padding: 20, paddingTop: 50 },
-  backText: { color: "#fff", fontSize: 16, marginBottom: 8 },
+  header: { backgroundColor: "red", padding: 20, paddingTop: 50 },
+  backText: { color: "#fff", fontSize: 25, marginBottom: 8 },
   title: { color: "#fff", fontSize: 22, fontWeight: "bold" },
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2 },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 },

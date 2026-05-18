@@ -24,14 +24,14 @@ export default function Events() {
   useEffect(() => { fetchEvents(); }, []);
 
   const addEvent = async () => {
-    if (!form.title || !form.date) { Alert.alert("Error", "Title এবং Date আবশ্যক"); return; }
+    if (!form.title || !form.date) { Alert.alert("Error", "Title and Date are required"); return; }
     const res = await fetch(`${BASE_URL}/api/events`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...form, organizer: user?.email, organizerName: user?.name }),
     });
     if (res.ok) {
-      Alert.alert("Success", "Event তৈরি হয়েছে");
+      Alert.alert("Success", "Event created successfully");
       setModal(false);
       setForm({ title: "", description: "", date: "", activityUpdate: "" });
       fetchEvents();
@@ -39,7 +39,7 @@ export default function Events() {
   };
 
   const deleteEvent = (id) => {
-    Alert.alert("Confirm", "Delete করবে?", [
+    Alert.alert("Confirm", "Delete the event?", [
       { text: "Cancel" },
       { text: "Delete", style: "destructive", onPress: async () => {
         await fetch(`${BASE_URL}/api/events/${id}`, { method: "DELETE" });
@@ -63,7 +63,7 @@ export default function Events() {
       {loading ? <ActivityIndicator size="large" color="#16a085" style={{ marginTop: 40 }} /> :
         <FlatList data={events} keyExtractor={item => item._id}
           contentContainerStyle={{ padding: 16 }}
-          ListEmptyComponent={<Text style={styles.empty}>কোনো event নেই</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>No events found</Text>}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.row}>
@@ -79,18 +79,18 @@ export default function Events() {
                   <Text style={styles.updateText}>📌 {item.activityUpdate}</Text>
                 </View>
               )}
-              <Text style={styles.organizer}>আয়োজক: {item.organizerName || user?.name}</Text>
+              <Text style={styles.organizer}>Organizer: {item.organizerName || user?.name}</Text>
             </View>
           )} />}
 
       <Modal visible={modal} animationType="slide" transparent>
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>নতুন Event</Text>
+            <Text style={styles.modalTitle}>New Event</Text>
             {[
               { key: "title", label: "Event Title *" },
-              { key: "date", label: "তারিখ * (YYYY-MM-DD)" },
-              { key: "description", label: "বিবরণ" },
+              { key: "date", label: "Date * (YYYY-MM-DD)" },
+              { key: "description", label: "Description" },
               { key: "activityUpdate", label: "Activity Update" },
             ].map(f => (
               <TextInput key={f.key} placeholder={f.label} style={styles.input}
