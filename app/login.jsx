@@ -221,7 +221,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login } = useAuth();
+  const { login, saveUserData } = useAuth();
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -233,6 +233,10 @@ export default function Login() {
     setIsLoading(true);
 
     try {
+      // Step 1: Firebase Authentication
+      const firebaseUser = await login(email, password);
+
+      // Step 2: Get user role and details from backend
       const response = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
@@ -240,7 +244,7 @@ export default function Login() {
         },
         body: JSON.stringify({
           email,
-          password,
+          uid: firebaseUser.uid,
         }),
       });
 
@@ -260,7 +264,12 @@ export default function Login() {
         return;
       }
 
-      await login(data);
+      // Step 3: Save user data
+      await saveUserData({
+        ...data,
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+      });
 
       const roleRoutes = {
         admin: "/(admin)/dashboard",
@@ -275,10 +284,18 @@ export default function Login() {
       );
 
     } catch (err) {
-      Alert.alert(
-        "Error",
-        "server is not responding"
-      );
+      if (err.code === "auth/user-not-found") {
+        Alert.alert("Error", "Email not found");
+      } else if (err.code === "auth/wrong-password") {
+        Alert.alert("Error", "Wrong password");
+      } else if (err.code === "auth/invalid-email") {
+        Alert.alert("Error", "Invalid email");
+      } else {
+        Alert.alert(
+          "Error",
+          err.message || "Login failed"
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -350,6 +367,19 @@ export default function Login() {
               </Text>
             )}
           </TouchableOpacity>
+
+          {/* Forgot Password Link */}
+          <TouchableOpacity onPress={() => router.push("/forgot-password")}>
+            <Text style={styles.forgotPassword}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          {/* Signup Link */}
+          <View style={styles.signupRedirect}>
+            <Text style={styles.signupText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={() => router.push("/signup")}>
+              <Text style={styles.signupLink}>Sign up</Text>
+            </TouchableOpacity>
+          </View>
 
         </View>
       </TouchableWithoutFeedback>
@@ -427,5 +457,31 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+
+  forgotPassword: {
+    textAlign: "center",
+    color: "#2e86de",
+    fontWeight: "600",
+    fontSize: 14,
+    marginTop: 15,
+  },
+
+  signupRedirect: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
+  },
+
+  signupText: {
+    color: "#666",
+    fontSize: 14,
+  },
+
+  signupLink: {
+    color: "#2e86de",
+    fontWeight: "bold",
+    fontSize: 14,
   },
 });

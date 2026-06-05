@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp, getApp, getApps } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -13,5 +13,40 @@ const firebaseConfig = {
   appId: "1:71050796943:web:3812f8992156a594f7f5fa"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase app
+let app;
+try {
+  if (getApps().length === 0) {
+    app = initializeApp(firebaseConfig);
+    console.log("✅ Firebase app initialized");
+  } else {
+    app = getApp();
+    console.log("✅ Firebase app already initialized");
+  }
+} catch (error) {
+  console.error("❌ Firebase app initialization error:", error);
+  throw error;
+}
+
+// Initialize Auth - with proper error handling
+let auth = null;
+try {
+  auth = getAuth(app);
+  console.log("✅ Firebase Auth initialized");
+} catch (error) {
+  console.error("❌ Firebase Auth initialization error:", error);
+  // Don't throw - return null to allow app to continue
+}
+
+// Initialize Firestore Database
+let db = null;
+try {
+  db = getFirestore(app);
+  console.log("✅ Firebase Firestore initialized");
+} catch (error) {
+  console.error("⚠️  Firebase Firestore initialization warning:", error);
+  // Firestore is optional
+}
+
+// Export with fallback
+export { auth, db, app };
