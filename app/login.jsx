@@ -1,219 +1,29 @@
-// // // import {
-// // //   View, Text, TextInput, TouchableOpacity,
-// // //   Image, StyleSheet, Alert, ActivityIndicator
-// // // } from "react-native";
-// // // import { useState } from "react";
-// // // import { useRouter } from "expo-router";
-// // // import { useAuth } from "../context/AuthContext";
-// // // import { BASE_URL } from "../constants/api";
-
-// // // export default function Login() {
-// // //   const [email, setEmail] = useState("");
-// // //   const [password, setPassword] = useState("");
-// // //   const [isLoading, setIsLoading] = useState(false);
-// // //   const { login } = useAuth();
-// // //   const router = useRouter();
-
-// // //   const handleLogin = async () => {
-// // //     if (!email || !password) { Alert.alert("Error", "Please fill all fields"); return; }
-// // //     setIsLoading(true);
-// // //     try {
-// // //       const response = await fetch(`${BASE_URL}/api/auth/login`, {
-// // //         method: "POST",
-// // //         headers: { "Content-Type": "application/json" },
-// // //         body: JSON.stringify({ email, password }),
-// // //       });
-// // //       const data = await response.json();
-// // //       if (!response.ok) { Alert.alert("Login Failed", data.message); return; }
-// // //       await login(data);
-// // //       switch (data.role) {
-// // //         case "admin": router.replace("/(admin)/dashboard"); break;
-// // //         case "accountant": router.replace("/(accountant)/dashboard"); break;
-// // //         case "canteen_manager": router.replace("/(canteen)/dashboard"); break;
-// // //         case "hall_rep": router.replace("/(hallrep)/dashboard"); break;
-// // //         default: router.replace("/(student)/dashboard");
-// // //       }
-// // //     } catch (err) {
-// // //       Alert.alert("Error", "Server-এ connect করা যাচ্ছে না");
-// // //     } finally {
-// // //       setIsLoading(false);
-// // //     }
-// // //   };
-
-// // //   return (
-// // //     <View style={styles.container}>
-// // //       <Image source={require("./../assets/images/logo.jpg")} style={styles.logo} />
-// // //       <Text style={styles.title}>NFC Hall Login</Text>
-// // //       <Text style={styles.subtitle}>Welcome back 👋</Text>
-// // //       <TextInput placeholder="Enter Email" style={styles.input} value={email}
-// // //         onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-// // //       <TextInput placeholder="Enter Password" secureTextEntry style={styles.input}
-// // //         value={password} onChangeText={setPassword} />
-// // //       <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={isLoading}>
-// // //         {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>LOGIN</Text>}
-// // //       </TouchableOpacity>
-// // //     </View>
-// // //   );
-// // // }
-
-// // // const styles = StyleSheet.create({
-// // //   container: { flex: 1, backgroundColor: "#f5f6fa", justifyContent: "center", padding: 25},
-// // //   logo: { width: 110, height: 110, borderRadius: 50, alignSelf: "center",marginBottom: 20 },
-// // //   title: { fontSize: 26, fontWeight: "bold", textAlign: "center", color: "#2e86de" },
-// // //   subtitle: { textAlign: "center", color: "gray", marginBottom: 30 },
-// // //   input: { backgroundColor: "#fff", padding: 12, borderRadius: 10, marginBottom: 15, borderWidth: 1, borderColor: "#ddd" },
-// // //   button: { backgroundColor: "#2e86de", padding: 15, borderRadius: 10, alignItems: "center", marginTop: 10 },
-// // //   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-// // // });
-
-// // import {
-// //   View, Text, TextInput, TouchableOpacity,
-// //   Image, StyleSheet, Alert, ActivityIndicator
-// // } from "react-native";
-// // import { useState } from "react";
-// // import { useRouter } from "expo-router";
-// // import { useAuth } from "../context/AuthContext";
-// // import { BASE_URL } from "../constants/api";
-
-// // export default function Login() {
-// //   const [email, setEmail] = useState("");
-// //   const [password, setPassword] = useState("");
-// //   const [isLoading, setIsLoading] = useState(false);
-
-// //   const { login } = useAuth();
-// //   const router = useRouter();
-
-// //   const handleLogin = async () => {
-// //     if (!email.trim() || !password.trim()) {
-// //       Alert.alert("Error", "Please fill all fields");
-// //       return;
-// //     }
-
-// //     setIsLoading(true);
-
-// //     try {
-// //       const response = await fetch(`${BASE_URL}/api/auth/login`, {
-// //         method: "POST",
-// //         headers: { "Content-Type": "application/json" },
-// //         body: JSON.stringify({ email, password }),
-// //       });
-
-// //       let data;
-// //       try {
-// //         data = await response.json();
-// //       } catch {
-// //         throw new Error("Invalid server response");
-// //       }
-
-// //       if (!response.ok) {
-// //         Alert.alert("Login Failed", data?.message || "Something went wrong");
-// //         return;
-// //       }
-
-// //       await login(data);
-
-// //       const roleRoutes = {
-// //         admin: "/(admin)/dashboard",
-// //         accountant: "/(accountant)/dashboard",
-// //         canteen_manager: "/(canteen)/dashboard",
-// //         hall_rep: "/(hallrep)/dashboard",
-// //         student: "/(student)/dashboard",
-// //       };
-
-// //       router.replace(roleRoutes[data.role] || roleRoutes.student);
-
-// //     } catch (err) {
-// //       Alert.alert("Error", "Server is not responding");
-// //     } finally {
-// //       setIsLoading(false);
-// //     }
-// //   };
-
-// //   return (
-// //     <View style={styles.container}>
-// //       <Image source={require("./../assets/images/logo.jpg")} style={styles.logo} />
-
-// //       <Text className='' style={styles.title}>NFC Hall Login</Text>
-// //       <Text style={styles.subtitle}>Welcome back</Text>
-
-// //       <TextInput
-// //         placeholder="Enter Email"
-// //         style={styles.input}
-// //         value={email}
-// //         onChangeText={setEmail}
-// //         keyboardType="email-address"
-// //         autoCapitalize="none"
-// //       />
-
-// //       <TextInput
-// //         placeholder="Enter Password"
-// //         secureTextEntry
-// //         style={styles.input}
-// //         value={password}
-// //         onChangeText={setPassword}
-// //       />
-
-// //       <TouchableOpacity
-// //         style={[styles.button, isLoading && { opacity: 0.7 }]}
-// //         onPress={handleLogin}
-// //         disabled={isLoading}
-// //       >
-// //         {isLoading ? (
-// //           <ActivityIndicator color="#fff" />
-// //         ) : (
-// //           <Text style={styles.buttonText}>LOGIN</Text>
-// //         )}
-// //       </TouchableOpacity>
-// //     </View>
-// //   );
-// // }
-
-// // const styles = StyleSheet.create({
-// //   container: { flex: 1, backgroundColor: "#f5f6fa", justifyContent: "top", padding: 25 },
-// //   logo: { width: 110, height: 110, borderRadius: 50, alignSelf: "center", marginBottom: 20 },
-// //   title: { fontSize: 30, fontWeight: "bold", textAlign: "center", color: "#2e86de", marginBottom: 30 },
-// //   subtitle: { textAlign: "center", color: "gray", marginBottom: 30 },
-// //   input: {
-// //     backgroundColor: "#fff",
-// //     padding: 12,
-// //     borderRadius: 10,
-// //     marginBottom: 15,
-// //     borderWidth: 1,
-// //     borderColor: "#ddd",
-// //   },
-// //   button: {
-// //     backgroundColor: "#2e86de",
-// //     padding: 15,
-// //     borderRadius: 10,
-// //     alignItems: "center",
-// //     marginTop: 10
-// //   },
-// //   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-// // });
-
-
-
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
+  View,Text,TextInput,TouchableOpacity,Image,StyleSheet,
+  Alert,ActivityIndicator,
+  KeyboardAvoidingView,Platform,
+  TouchableWithoutFeedback,Keyboard,
 } from "react-native";
 
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, FontAwesome } from "@expo/vector-icons";
+import * as WebBrowser from "expo-web-browser";
+import * as AuthSession from "expo-auth-session";
 
 import { useAuth } from "../context/AuthContext";
 import { BASE_URL } from "../constants/api";
+
+// Redirect scheme - update this with your app's scheme
+const redirectUrl = AuthSession.makeRedirectUrl({
+  path: "auth/google/callback",
+});
+
+// Google OAuth config - Replace with your actual Google Client ID
+const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+const GOOGLE_CLIENT_SECRET = "YOUR_GOOGLE_CLIENT_SECRET"; // Optional for web
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -233,47 +43,18 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // Step 1: Firebase Authentication
-      const firebaseUser = await login(email, password);
+      // Backend login directly (no Firebase)
+      const data = await login(email, password);
 
-      // Step 2: Get user role and details from backend
-      const response = await fetch(`${BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          uid: firebaseUser.uid,
-        }),
-      });
-
-      let data;
-
-      try {
-        data = await response.json();
-      } catch {
-        throw new Error("Invalid server response");
+      // data should contain: email, uid, role, etc.
+      if (!data.email || !data.uid) {
+        throw new Error("Server response missing email & uid");
       }
-
-      if (!response.ok) {
-        Alert.alert(
-          "Login Failed",
-          data?.message || "Something went wrong"
-        );
-        return;
-      }
-
-      // Step 3: Save user data
-      await saveUserData({
-        ...data,
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-      });
 
       const roleRoutes = {
         admin: "/(admin)/dashboard",
         accountant: "/(accountant)/dashboard",
+        canteen_manager: "/(canteen)/dashboard",
         canteen: "/(canteen)/dashboard",
         hall_rep: "/(hallrep)/dashboard",
         student: "/(student)/dashboard",
@@ -284,18 +65,87 @@ export default function Login() {
       );
 
     } catch (err) {
-      if (err.code === "auth/user-not-found") {
-        Alert.alert("Error", "Email not found");
-      } else if (err.code === "auth/wrong-password") {
-        Alert.alert("Error", "Wrong password");
-      } else if (err.code === "auth/invalid-email") {
-        Alert.alert("Error", "Invalid email");
+      Alert.alert(
+        "Login Error",
+        err.message || "Login failed"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+
+      const discovery = await AuthSession.fetchDiscoveryAsync(
+        "https://accounts.google.com"
+      );
+
+      const request = new AuthSession.AuthRequest({
+        clientId: GOOGLE_CLIENT_ID,
+        scopes: ["profile", "email"],
+        redirectUrl,
+        usePKCE: true,
+        extraParams: {
+          access_type: "offline",
+        },
+      });
+
+      const result = await request.promptAsync(discovery, {
+        useProxy: true,
+      });
+
+      if (result.type === "success") {
+        // Get user info from Google
+        const response = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+          headers: { Authorization: `Bearer ${result.authentication.accessToken}` },
+        });
+
+        const googleUser = await response.json();
+
+        // Send to backend for authentication
+        const backendResponse = await fetch(`${BASE_URL}/api/auth/google`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: googleUser.email,
+            fullName: googleUser.name,
+            googleId: googleUser.id,
+            picture: googleUser.picture,
+          }),
+        });
+
+        let data;
+        try {
+          data = await backendResponse.json();
+        } catch {
+          throw new Error("Invalid server response");
+        }
+
+        if (!backendResponse.ok) {
+          Alert.alert("Google Sign-In Failed", data?.message || "Something went wrong");
+          return;
+        }
+
+        await login(data);
+
+        const roleRoutes = {
+          admin: "/(admin)/dashboard",
+          accountant: "/(accountant)/dashboard",
+          canteen_manager: "/(canteen)/dashboard",
+          canteen: "/(canteen)/dashboard",
+          hall_rep: "/(hallrep)/dashboard",
+          student: "/(student)/dashboard",
+        };
+
+        router.replace(roleRoutes[data.role] || roleRoutes.student);
+
       } else {
-        Alert.alert(
-          "Error",
-          err.message || "Login failed"
-        );
+        Alert.alert("Google Sign-In", "Sign-in was cancelled");
       }
+    } catch (error) {
+      Alert.alert("Error", error.message || "Google sign-in failed");
     } finally {
       setIsLoading(false);
     }

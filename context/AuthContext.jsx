@@ -1,12 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-} from "firebase/auth";
-import { auth } from "../firebaseConfig";
+import { BASE_URL } from "../constants/api";
 
 const AuthContext = createContext({
   user: null,
@@ -23,74 +17,87 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Firebase auth state listener
+  // Restore user session from storage on app load
   useEffect(() => {
-    console.log("🔄 Setting up auth listener...");
+    console.log("🔄 Restoring user session...");
     
-    if (!auth) {
-      console.error("❌ Auth not available yet");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        console.log("👤 Auth state changed:", firebaseUser ? firebaseUser.email : "No user");
-        
-        if (firebaseUser) {
-          // Load user data from AsyncStorage
-          try {
-            const saved = await AsyncStorage.getItem("user");
-            if (saved) {
-              setUser(JSON.parse(saved));
-            } else {
-              // If not in AsyncStorage, create minimal user object
-              setUser({
-                email: firebaseUser.email,
-                uid: firebaseUser.uid,
-              });
-            }
-          } catch (err) {
-            console.log("Load user error:", err);
-          }
+    const restoreSession = async () => {
+      try {
+        const saved = await AsyncStorage.getItem("user");
+        if (saved) {
+          const userData = JSON.parse(saved);
+          setUser(userData);
+          console.log("Session restored for:", userData.email);
         } else {
-          setUser(null);
+          console.log("No saved session found");
         }
+      } catch (err) {
+        console.error("Error restoring session:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
 
-      return unsubscribe;
-    } catch (error) {
-      console.error("❌ Error setting up auth listener:", error);
-      setLoading(false);
-    }
+    restoreSession();
   }, []);
 
-  const signup = async (email, password) => {
+  const signup = async (email, password, fullName, phone) => {
     setError(null);
+    setLoading(true);
     try {
-      console.log("📝 Signing up with email:", email);
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("✅ Signup successful:", result.user.uid);
-      return result.user;
+      console.log("Signing up:", email);
+      
+      const response = await fetch(`${BASE_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, fullName, phone }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
+
+      console.log("Signup successful");
+      return data;
     } catch (err) {
-      console.error("❌ Signup error:", err);
+      console.error("Signup error:", err.message);
       setError(err.message);
       throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
   const login = async (email, password) => {
     setError(null);
+    setLoading(true);
     try {
-      console.log("🔐 Logging in with email:", email);
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      console.log("✅ Login successful:", result.user.uid);
-      return result.user;
+      console.log("Logging in:", email);
+      
+      const response = await fetch(`${BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      // Save user session
+      await saveUserData(data);
+      console.log("Login successful");
+      return data;
     } catch (err) {
-      console.error("❌ Login error:", err);
+      console.error("Login error:", err.message);
       setError(err.message);
       throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -98,8 +105,10 @@ export function AuthProvider({ children }) {
     try {
       setUser(userData);
       await AsyncStorage.setItem("user", JSON.stringify(userData));
+      console.log("User data saved");
     } catch (err) {
-      console.log("Save user error:", err);
+      console.error("Error saving user data:", err);
+      setError(err.message);
     }
   };
 
@@ -107,12 +116,11 @@ export function AuthProvider({ children }) {
     setError(null);
     try {
       console.log("👋 Logging out...");
-      await signOut(auth);
       setUser(null);
       await AsyncStorage.removeItem("user");
-      console.log("✅ Logout successful");
+      console.log("Logout successful");
     } catch (err) {
-      console.error("❌ Logout error:", err);
+      console.error("Logout error:", err);
       setError(err.message);
       throw err;
     }

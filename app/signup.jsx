@@ -93,11 +93,8 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      // Step 1: Firebase signup
-      const firebaseUser = await signup(email, password);
-
-      // Step 2: Register in backend
-      const response = await fetch(`${BASE_URL}/api/auth/signup`, {
+      // Backend signup directly (no Firebase)
+      const signupResponse = await fetch(`${BASE_URL}/api/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -106,52 +103,58 @@ export default function Signup() {
           fullName: fullName.trim(),
           email: email.trim(),
           phone: phone.trim(),
-          uid: firebaseUser.uid,
+          password: password,
           role: "student", // Default role is student
         }),
       });
 
-      let data;
-
+      let signupData;
       try {
-        data = await response.json();
+        signupData = await signupResponse.json();
       } catch {
         throw new Error("Invalid server response");
       }
 
-      if (!response.ok) {
+      if (!signupResponse.ok) {
         Alert.alert(
           "Signup Failed",
-          data?.message || "Something went wrong"
+          signupData?.message || "Something went wrong"
         );
         return;
       }
 
-      // Step 3: Save user data
-      await saveUserData({
-        ...data,
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-      });
+      // Save user data
+      if (!signupData.email || !signupData.uid) {
+        throw new Error("Server did not return email & uid");
+      }
+
+      await saveUserData(signupData);
 
       Alert.alert("Success", "Account created successfully!");
 
-      // Step 4: Redirect to dashboard
-      router.replace("/(student)/dashboard");
-
-    } catch (err) {
-      if (err.code === "auth/email-already-in-use") {
-        Alert.alert("Error", "This email is already registered");
-      } else if (err.code === "auth/weak-password") {
-        Alert.alert("Error", "Password is too weak");
-      } else if (err.code === "auth/invalid-email") {
-        Alert.alert("Error", "Invalid email address");
-      } else {
-        Alert.alert(
-          "Error",
-          err.message || "Signup failed"
-        );
+      // Redirect based on role
+      const role = signupData.role || "student";
+      switch (role) {
+        case "admin":
+          router.replace("/(admin)/dashboard");
+          break;
+        case "accountant":
+          router.replace("/(accountant)/dashboard");
+          break;
+        case "canteen_manager":
+          router.replace("/(canteen)/dashboard");
+          break;
+        case "hall_rep":
+          router.replace("/(hallrep)/dashboard");
+          break;
+        default:
+          router.replace("/(student)/dashboard");
       }
+    } catch (err) {
+      Alert.alert(
+        "Error",
+        err.message || "Signup failed"
+      );
     } finally {
       setIsLoading(false);
     }
