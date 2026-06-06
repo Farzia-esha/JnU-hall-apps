@@ -17,24 +17,22 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Restore user session from storage on app load
+  // App load হলে saved session restore করো
   useEffect(() => {
-    console.log("🔄 Restoring user session...");
-    
     const restoreSession = async () => {
       try {
         const saved = await AsyncStorage.getItem("user");
         if (saved) {
           const userData = JSON.parse(saved);
           setUser(userData);
-          console.log("Session restored for:", userData.email);
+          console.log("✅ Session restored for:", userData.email);
         } else {
-          console.log("No saved session found");
+          console.log("ℹ️ No saved session found");
         }
       } catch (err) {
-        console.error("Error restoring session:", err);
+        console.error("❌ Error restoring session:", err);
       } finally {
-        setLoading(false);
+        setLoading(false); // শুধু session restore এর জন্য
       }
     };
 
@@ -43,10 +41,7 @@ export function AuthProvider({ children }) {
 
   const signup = async (email, password, fullName, phone) => {
     setError(null);
-    setLoading(true);
     try {
-      console.log("Signing up:", email);
-      
       const response = await fetch(`${BASE_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -59,23 +54,16 @@ export function AuthProvider({ children }) {
         throw new Error(data.message || "Signup failed");
       }
 
-      console.log("Signup successful");
       return data;
     } catch (err) {
-      console.error("Signup error:", err.message);
       setError(err.message);
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
   const login = async (email, password) => {
     setError(null);
-    setLoading(true);
     try {
-      console.log("Logging in:", email);
-      
       const response = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,16 +76,11 @@ export function AuthProvider({ children }) {
         throw new Error(data.message || "Login failed");
       }
 
-      // Save user session
       await saveUserData(data);
-      console.log("Login successful");
       return data;
     } catch (err) {
-      console.error("Login error:", err.message);
       setError(err.message);
       throw err;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -105,9 +88,9 @@ export function AuthProvider({ children }) {
     try {
       setUser(userData);
       await AsyncStorage.setItem("user", JSON.stringify(userData));
-      console.log("User data saved");
+      console.log("✅ User data saved");
     } catch (err) {
-      console.error("Error saving user data:", err);
+      console.error("❌ Error saving user data:", err);
       setError(err.message);
     }
   };
@@ -115,12 +98,11 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     setError(null);
     try {
-      console.log("👋 Logging out...");
       setUser(null);
       await AsyncStorage.removeItem("user");
-      console.log("Logout successful");
+      console.log("✅ Logout successful");
     } catch (err) {
-      console.error("Logout error:", err);
+      console.error("❌ Logout error:", err);
       setError(err.message);
       throw err;
     }
