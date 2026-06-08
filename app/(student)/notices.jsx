@@ -41,7 +41,7 @@ export default function Notices() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f6fa" },
-  header: { backgroundColor: "#e67e22", padding: 20, paddingTop: 50 },
+  header: { backgroundColor: "purple", padding: 20, paddingTop: 50 },
   backText: { color: "#fff", fontSize: 20, marginBottom: 8 },
   title: { color: "#fff", fontSize: 22, fontWeight: "bold" },
   card: { backgroundColor: "#fff", borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2 },

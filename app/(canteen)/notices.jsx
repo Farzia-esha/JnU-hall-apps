@@ -1,31 +1,29 @@
-
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from "react-native";
+import {
+  View, Text, StyleSheet, FlatList,
+  ActivityIndicator, TouchableOpacity
+} from "react-native";
 import { BASE_URL } from "../../constants/api";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function CanteenFeedback() {
-  const [feedbacks, setFeedbacks] = useState([]);
+export default function CanteenNotices() {
+  const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/canteen/feedback`)
+    fetch(`${BASE_URL}/api/notices`)
       .then(res => res.json())
-      .then(data => { setFeedbacks(Array.isArray(data) ? data : []); setLoading(false); })
+      .then(data => { setNotices(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
-  const avatarColors = [
-    { bg: "#E6F1FB", text: "#0C447C" },
-    { bg: "#E1F5EE", text: "#085041" },
-    { bg: "#FAEEDA", text: "#633806" },
-  ];
-
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
-    return new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "numeric", month: "short", year: "numeric"
+    });
   };
 
   return (
@@ -37,10 +35,10 @@ export default function CanteenFeedback() {
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>Student Feedback</Text>
+          <Text style={styles.title}>Notices</Text>
           {!loading && (
             <View style={styles.countBadge}>
-              <Text style={styles.countText}>{feedbacks.length} total</Text>
+              <Text style={styles.countText}>{notices.length} total</Text>
             </View>
           )}
         </View>
@@ -50,36 +48,36 @@ export default function CanteenFeedback() {
         <ActivityIndicator size="large" color="#185FA5" style={{ marginTop: 40 }} />
       ) : (
         <FlatList
-          data={feedbacks}
+          data={notices}
           keyExtractor={item => item._id}
           contentContainerStyle={{ padding: 14, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.emptyBox}>
-              <Ionicons name="chatbubble-outline" size={48} color="#ccc" />
-              <Text style={styles.emptyText}>No feedback yet</Text>
+              <Ionicons name="megaphone-outline" size={48} color="#ccc" />
+              <Text style={styles.emptyText}>No notices yet</Text>
             </View>
           }
-          renderItem={({ item, index }) => {
-            const color = avatarColors[index % 3];
-            const initials = (item.studentName || "?").slice(0, 1).toUpperCase();
-            return (
-              <View style={styles.card}>
-                <View style={styles.cardTop}>
-                  <View style={[styles.avatar, { backgroundColor: color.bg }]}>
-                    <Text style={[styles.avatarText, { color: color.text }]}>{initials}</Text>
-                  </View>
-                  <View style={styles.studentInfo}>
-                    <Text style={styles.studentName}>{item.studentName || "Anonymous"}</Text>
-                    <Text style={styles.dateText}>{formatDate(item.createdAt)}</Text>
-                  </View>
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <View style={styles.cardTop}>
+                <View style={styles.iconWrap}>
+                  <Ionicons name="megaphone-outline" size={18} color="#185FA5" />
                 </View>
-                <Text style={styles.feedbackText}>{item.feedback || item.message}</Text>
               </View>
-            );
-          }}
+              <Text style={styles.nTitle}>{item.title}</Text>
+              <Text style={styles.nContent}>{item.content}</Text>
+              <View style={styles.cardFooter}>
+                <Ionicons name="person-outline" size={12} color="#aaa" />
+                <Text style={styles.footerText}>{item.postedBy || "Admin"}</Text>
+                <Text style={styles.dot}>·</Text>
+                <Text style={styles.footerText}>{formatDate(item.createdAt)}</Text>
+              </View>
+            </View>
+          )}
         />
       )}
+
     </View>
   );
 }
@@ -97,18 +95,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20,
   },
   countText: { color: "#fff", fontSize: 12 },
+
   card: {
     backgroundColor: "#fff", borderRadius: 14,
     borderWidth: 0.5, borderColor: "#e0e0e0",
     padding: 14, marginBottom: 10,
   },
-  cardTop: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 },
-  avatar: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
-  avatarText: { fontSize: 15, fontWeight: "600" },
-  studentInfo: { flex: 1 },
-  studentName: { fontSize: 14, fontWeight: "600", color: "#1a1a1a" },
-  dateText: { fontSize: 12, color: "#aaa", marginTop: 2 },
-  feedbackText: { fontSize: 14, color: "#555", lineHeight: 20 },
+  cardTop: { marginBottom: 10 },
+  iconWrap: {
+    width: 36, height: 36, borderRadius: 8,
+    backgroundColor: "#E6F1FB",
+    alignItems: "center", justifyContent: "center",
+  },
+  nTitle: { fontSize: 15, fontWeight: "600", color: "#1a1a1a", marginBottom: 6 },
+  nContent: { fontSize: 14, color: "#555", lineHeight: 20 },
+  cardFooter: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 12 },
+  footerText: { fontSize: 12, color: "#aaa" },
+  dot: { fontSize: 12, color: "#aaa" },
+
   emptyBox: { alignItems: "center", marginTop: 60, gap: 10 },
   emptyText: { fontSize: 15, color: "#bbb" },
 });

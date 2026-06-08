@@ -1,19 +1,22 @@
 import { useEffect, useState } from "react";
 import {
   View, Text, StyleSheet, FlatList, ActivityIndicator,
-  TouchableOpacity, TextInput, Alert, Modal
+  TouchableOpacity, TextInput, Alert, Modal,
+  KeyboardAvoidingView, Platform, ScrollView
 } from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { BASE_URL } from "../../constants/api";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function Complaints() {
+export default function StudentComplaints() {
   const { user } = useAuth();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
   const fetchComplaints = () => {
@@ -27,92 +30,195 @@ export default function Complaints() {
 
   const submitComplaint = async () => {
     if (!title || !description) { Alert.alert("Error", "Please fill in all fields"); return; }
+    setSubmitting(true);
     try {
       const res = await fetch(`${BASE_URL}/api/complaints`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description, studentEmail: user?.email, studentName: user?.name }),
+        body: JSON.stringify({
+          title,
+          description,
+          studentEmail: user?.email,
+          studentName: user?.fullName,
+        }),
       });
       if (res.ok) {
         Alert.alert("Success", "Complaint submitted successfully");
         setModal(false); setTitle(""); setDescription("");
         fetchComplaints();
       }
-    } catch { Alert.alert("Error", "Failed to submit complaint"); }
+    } catch { Alert.alert("Error", "Failed to submit"); }
+    finally { setSubmitting(false); }
   };
 
-  const statusColor = (s) => s === "resolved" ? "#2ecc71" : s === "in_progress" ? "#f39c12" : "#e74c3c";
+  const statusConfig = {
+    pending:     { label: "Pending",     bg: "#FCEBEB", text: "#A32D2D", icon: "time-outline" },
+    in_progress: { label: "In Progress", bg: "#FAEEDA", text: "#633806", icon: "reload-outline" },
+    resolved:    { label: "Resolved",    bg: "#E1F5EE", text: "#085041", icon: "checkmark-circle-outline" },
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  };
 
   return (
     <View style={styles.container}>
+
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}><Text style={styles.backText}>← Back</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={16} color="rgba(255,255,255,0.8)" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>📝 Complaints</Text>
-          <TouchableOpacity style={styles.addBtn} onPress={() => setModal(true)}>
-            <Text style={styles.addText}>+ New</Text>
+          <Text style={styles.title}>My Complaints</Text>
+          <TouchableOpacity style={styles.newBtn} onPress={() => setModal(true)}>
+            <Ionicons name="add" size={18} color="#0C447C" />
+            <Text style={styles.newBtnText}>New</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {loading ? <ActivityIndicator size="large" color="#e74c3c" style={{ marginTop: 40 }} /> :
+      {loading ? (
+        <ActivityIndicator size="large" color="#185FA5" style={{ marginTop: 40 }} />
+      ) : (
         <FlatList
           data={complaints}
           keyExtractor={item => item._id}
-          contentContainerStyle={{ padding: 16 }}
-          ListEmptyComponent={<Text style={styles.empty}>No complaints found</Text>}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <View style={styles.row}>
-                <Text style={styles.cTitle}>{item.title}</Text>
-                <Text style={[styles.status, { backgroundColor: statusColor(item.status) }]}>{item.status}</Text>
-              </View>
-              <Text style={styles.desc}>{item.description}</Text>
-              <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+          contentContainerStyle={{ padding: 14, paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyBox}>
+              <Ionicons name="chatbox-ellipses-outline" size={48} color="#ccc" />
+              <Text style={styles.emptyText}>No complaints yet</Text>
+              <TouchableOpacity style={styles.emptyBtn} onPress={() => setModal(true)}>
+                <Text style={styles.emptyBtnText}>Submit your first complaint</Text>
+              </TouchableOpacity>
             </View>
-          )}
-        />}
+          }
+          renderItem={({ item }) => {
+            const sc = statusConfig[item.status] || statusConfig.pending;
+            return (
+              <View style={styles.card}>
+                <View style={styles.cardTop}>
+                  <View style={[styles.statusBadge, { backgroundColor: sc.bg }]}>
+                    <Ionicons name={sc.icon} size={12} color={sc.text} />
+                    <Text style={[styles.statusText, { color: sc.text }]}>{sc.label}</Text>
+                  </View>
+                  <Text style={styles.dateText}>{formatDate(item.createdAt)}</Text>
+                </View>
+                <Text style={styles.cTitle}>{item.title}</Text>
+                <Text style={styles.desc} numberOfLines={2}>{item.description}</Text>
+              </View>
+            );
+          }}
+        />
+      )}
 
+      {/* New Complaint Modal */}
       <Modal visible={modal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>New Complaint</Text>
-            <TextInput placeholder="Subject" style={styles.input} value={title} onChangeText={setTitle} />
-            <TextInput placeholder="Provide details..." style={[styles.input, { height: 100 }]}
-              value={description} onChangeText={setDescription} multiline />
-            <TouchableOpacity style={styles.submitBtn} onPress={submitComplaint}>
-              <Text style={styles.submitText}>Submit</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setModal(false)}>
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+          <View style={styles.overlay}>
+            <View style={styles.modalCard}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>New Complaint</Text>
+                <TouchableOpacity onPress={() => setModal(false)}>
+                  <Ionicons name="close" size={22} color="#555" />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.fieldLabel}>Subject</Text>
+              <TextInput
+                placeholder="Enter complaint subject"
+                placeholderTextColor="#ccc"
+                style={styles.input}
+                value={title}
+                onChangeText={setTitle}
+              />
+
+              <Text style={styles.fieldLabel}>Details</Text>
+              <TextInput
+                placeholder="Describe your complaint..."
+                placeholderTextColor="#ccc"
+                style={[styles.input, styles.textArea]}
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                textAlignVertical="top"
+              />
+
+              <TouchableOpacity
+                style={[styles.submitBtn, submitting && { opacity: 0.7 }]}
+                onPress={submitComplaint}
+                disabled={submitting}
+              >
+                {submitting
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.submitText}>Submit Complaint</Text>
+                }
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setModal(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
+
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f6fa" },
-  header: { backgroundColor: "#e74c3c", padding: 20, paddingTop: 50 },
-  backText: { color: "#fff", fontSize: 20, marginBottom: 8 },
+  header: { backgroundColor: "purple", paddingHorizontal: 20, paddingTop: 55, paddingBottom: 16 },
+  backBtn: { flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 12 },
+  backText: { color: "white", fontSize: 15 },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  title: { color: "#fff", fontSize: 22, fontWeight: "bold" },
-  addBtn: { backgroundColor: "#fff", paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
-  addText: { color: "#e74c3c", fontWeight: "bold" },
-  card: { backgroundColor: "#fff", borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2 },
-  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 },
-  cTitle: { fontSize: 16, fontWeight: "bold", color: "#222", flex: 1 },
-  status: { color: "#fff", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20, fontSize: 12 },
-  desc: { fontSize: 14, color: "#555" },
-  date: { fontSize: 12, color: "#999", marginTop: 6 },
-  empty: { textAlign: "center", color: "#999", marginTop: 40, fontSize: 16 },
-  modalOverlay: { flex: 1, backgroundColor: "#00000066", justifyContent: "center", padding: 20 },
-  modalCard: { backgroundColor: "#fff", borderRadius: 16, padding: 24 },
-  modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 16, color: "#222" },
-  input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 10, padding: 12, marginBottom: 12, fontSize: 15 },
-  submitBtn: { backgroundColor: "#e74c3c", padding: 14, borderRadius: 10, alignItems: "center", marginBottom: 10 },
-  submitText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  cancelText: { textAlign: "center", color: "#999", fontSize: 15 },
+  title: { color: "#fff", fontSize: 20, fontWeight: "600" },
+  newBtn: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: "#fff", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
+  },
+  newBtnText: { color: "#0C447C", fontWeight: "600", fontSize: 13 },
+
+  card: {
+    backgroundColor: "#fff", borderRadius: 14,
+    borderWidth: 0.5, borderColor: "#e0e0e0",
+    padding: 14, marginBottom: 10,
+  },
+  cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  statusBadge: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20,
+  },
+  statusText: { fontSize: 12, fontWeight: "500" },
+  dateText: { fontSize: 12, color: "#aaa" },
+  cTitle: { fontSize: 15, fontWeight: "600", color: "#1a1a1a", marginBottom: 6 },
+  desc: { fontSize: 13, color: "#666", lineHeight: 18 },
+
+  emptyBox: { alignItems: "center", marginTop: 60, gap: 10 },
+  emptyText: { fontSize: 15, color: "#bbb" },
+  emptyBtn: {
+    backgroundColor: "#E6F1FB", paddingHorizontal: 16, paddingVertical: 10,
+    borderRadius: 10, marginTop: 4,
+  },
+  emptyBtnText: { color: "#185FA5", fontSize: 13, fontWeight: "500" },
+
+  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" },
+  modalCard: { backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 },
+  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
+  modalTitle: { fontSize: 18, fontWeight: "600", color: "#1a1a1a" },
+  fieldLabel: { fontSize: 12, color: "#888", marginBottom: 4 },
+  input: {
+    backgroundColor: "#f9f9f9", borderRadius: 10,
+    borderWidth: 0.5, borderColor: "#e0e0e0",
+    padding: 12, fontSize: 14, color: "#333", marginBottom: 12,
+  },
+  textArea: { height: 110 },
+  submitBtn: { backgroundColor: "#185FA5", padding: 15, borderRadius: 12, alignItems: "center", marginTop: 4 },
+  submitText: { color: "#fff", fontWeight: "600", fontSize: 15 },
+  cancelBtn: { alignItems: "center", paddingVertical: 14 },
+  cancelText: { color: "#888", fontSize: 14 },
 });

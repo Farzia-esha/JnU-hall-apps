@@ -69,7 +69,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Welcome back,</Text>
+          <Text style={styles.greeting}>Welcome</Text>
           <Text style={styles.adminName}>{user?.fullName || "Admin"}</Text>
         </View>
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
@@ -135,11 +135,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  greeting: { color: "rgba(255,255,255,0.65)", fontSize: 13 },
+  greeting: { color: "white", fontSize: 15 },
   adminName: { color: "#fff", fontSize: 22, fontWeight: "600", marginTop: 2 },
   logoutBtn: {
     flexDirection: "row", alignItems: "center", gap: 6,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "red",
     borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
     paddingHorizontal: 14, paddingVertical: 8,
     borderRadius: 10,
