@@ -50,6 +50,7 @@ export default function StudentDashboard() {
     { title: "Canteen Menu",  sub: "Today's food",          icon: "restaurant-outline",       color: "#E1F5EE", iconColor: "#0F6E56", route: "/(student)/canteen" },
     { title: "Payments",      sub: "Your payment status",   icon: "card-outline",             color: "#FAEEDA", iconColor: "#854F0B", route: "/(student)/payment" },
     { title: "Events",        sub: "Hall events & updates", icon: "calendar-outline",         color: "#E1F5EE", iconColor: "#0F6E56", route: "/(student)/events" },
+    { title: "Apply for Hall Seat", sub: "Application & payment", icon: "clipboard-outline", color: "#E6F1FB", iconColor: "#185FA5", route: "/(student)/apply" },
   ];
 
   return (
