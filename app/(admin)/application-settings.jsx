@@ -8,7 +8,6 @@ import { BASE_URL } from "../../constants/api";
 import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-// npm install @react-native-community/datetimepicker
 
 export default function ApplicationSettings() {
   const router = useRouter();

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,8 +11,8 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   const [studentCount, setStudentCount] = useState(null);
-  const [complaintCount, setComplaintCount] = useState(null);
-  const [noticeCount, setNoticeCount] = useState(null);
+  const [applicationCount, setApplicationCount] = useState(null);
+  const [vacantSeatCount, setVacantSeatCount] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
 
   useFocusEffect(
@@ -22,46 +22,61 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     setStatsLoading(true);
     try {
-      const [studentsRes, complaintsRes, noticesRes] = await Promise.all([
+      const [studentsRes, applicationsRes, noticesRes] = await Promise.all([
         fetch(`${BASE_URL}/api/admin/students`),
-        fetch(`${BASE_URL}/api/complaints`),
+        fetch(`${BASE_URL}/api/admin/applications`),
         fetch(`${BASE_URL}/api/notices`),
       ]);
       const students = await studentsRes.json();
-      const complaints = await complaintsRes.json();
+      const applications = await applicationsRes.json();
       const notices = await noticesRes.json();
 
       setStudentCount(Array.isArray(students) ? students.length : 0);
-      setComplaintCount(Array.isArray(complaints) ? complaints.length : 0);
-      setNoticeCount(Array.isArray(notices) ? notices.length : 0);
+      setApplicationCount(Array.isArray(applications) ? applications.length : 0);
+      setVacantSeatCount(Array.isArray(notices) ? notices.length : 0);
     } catch {
       setStudentCount(0);
-      setComplaintCount(0);
-      setNoticeCount(0);
+      setApplicationCount(0);
+      setVacantSeatCount(0);
     } finally {
       setStatsLoading(false);
     }
   };
 
   const handleLogout = () => {
-    logout().then(() => router.replace("/login"));
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to logout?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: async () => {
+            await logout();
+            router.replace("/login");
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const stats = [
     { label: "Students",   value: studentCount,  icon: "people-outline",           color: "#E6F1FB", iconColor: "#185FA5" },
-    { label: "Complaints", value: complaintCount, icon: "chatbox-ellipses-outline", color: "#FAEEDA", iconColor: "#854F0B" },
-    { label: "Notices",    value: noticeCount,    icon: "notifications-outline",    color: "#E1F5EE", iconColor: "#0F6E56" },
+    { label: "Applications", value: applicationCount, icon: "document-text-outline", color: "#FAEEDA", iconColor: "#854F0B" },
+    { label: "Vacant Seats", value: vacantSeatCount,    icon: "bed-outline",    color: "#E1F5EE", iconColor: "#0F6E56" },
   ];
 
   const menus = [
+    { title: "User Management",  sub: "Manage roles",        icon: "shield-outline",          color: "#E1F5EE", iconColor: "#0F6E56", route: "/(admin)/users" },
     { title: "Students",         sub: "View all records",    icon: "people-outline",          color: "#E6F1FB", iconColor: "#185FA5", route: "/(admin)/students" },
     { title: "Add Student",      sub: "Register new",        icon: "person-add-outline",      color: "#E1F5EE", iconColor: "#0F6E56", route: "/(admin)/add-student" },
     { title: "Notices",          sub: "Post & manage",       icon: "megaphone-outline",       color: "#FAEEDA", iconColor: "#854F0B", route: "/(admin)/notices" },
     { title: "Complaints",       sub: "Review & resolve",    icon: "chatbox-ellipses-outline",color: "#E6F1FB", iconColor: "#185FA5", route: "/(admin)/complaints" },
-    { title: "User Management",  sub: "Manage roles",        icon: "shield-outline",          color: "#E1F5EE", iconColor: "#0F6E56", route: "/(admin)/users" },
-    { title: "Applications",      sub: "Review & allocate seats", icon: "document-text-outline", color: "#FAEEDA", iconColor: "#854F0B", route: "/(admin)/applications" },
-    { title: "Application Window",sub: "Set open/close dates",    icon: "time-outline",           color: "#E6F1FB", iconColor: "#185FA5", route: "/(admin)/application-settings" },
-    { title: "Seat Inventory",    sub: "Manage rooms & seats",    icon: "bed-outline",            color: "#E1F5EE", iconColor: "#0F6E56", route: "/(admin)/seats" },
+    { title: "Applications",     sub: "Review & allocate seats", icon: "document-text-outline", color: "#FAEEDA", iconColor: "#854F0B", route: "/(admin)/applications" },
+    { title: "Application Time", sub: "Set open/close dates",    icon: "time-outline",           color: "#E6F1FB", iconColor: "#185FA5", route: "/(admin)/application-settings" },
+    { title: "Seat Inventory",   sub: "Manage rooms & seats",    icon: "bed-outline",            color: "#E1F5EE", iconColor: "#0F6E56", route: "/(admin)/seats" },
   ];
 
   return (
@@ -69,7 +84,7 @@ export default function AdminDashboard() {
 
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Welcome back,</Text>
+          <Text style={styles.greeting}>Welcome</Text>
           <Text style={styles.adminName}>{user?.fullName || "Admin"}</Text>
         </View>
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
@@ -130,7 +145,7 @@ const styles = StyleSheet.create({
   adminName: { color: "#fff", fontSize: 22, fontWeight: "600", marginTop: 2 },
   logoutBtn: {
     flexDirection: "row", alignItems: "center", gap: 6,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "red",
     borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
   },
