@@ -16,6 +16,10 @@ export default function AdminNotices() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [publishing, setPublishing] = useState(false);
+
+  // Edit mode state
+  const [editingId, setEditingId] = useState(null); // null = creating new, else editing this id
+
   const router = useRouter();
 
   const fetchNotices = () => {
@@ -27,20 +31,47 @@ export default function AdminNotices() {
 
   useEffect(() => { fetchNotices(); }, []);
 
-  const publishNotice = async () => {
+  const openCreateModal = () => {
+    setEditingId(null);
+    setTitle("");
+    setContent("");
+    setModal(true);
+  };
+
+  const openEditModal = (notice) => {
+    setEditingId(notice._id);
+    setTitle(notice.title || "");
+    setContent(notice.content || "");
+    setModal(true);
+  };
+
+  const submitNotice = async () => {
     if (!title || !content) { Alert.alert("Error", "All fields are required"); return; }
     setPublishing(true);
     try {
-      const res = await fetch(`${BASE_URL}/api/admin/notices`, {
-        method: "POST",
+      const isEditing = !!editingId;
+      const url = isEditing
+        ? `${BASE_URL}/api/admin/notices/${editingId}`
+        : `${BASE_URL}/api/admin/notices`;
+      const method = isEditing ? "PUT" : "POST";
+      const body = isEditing
+        ? { title, content }
+        : { title, content, postedBy: user?.email };
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, postedBy: user?.email }),
+        body: JSON.stringify(body),
       });
       if (res.ok) {
-        Alert.alert("Success", "Notice published");
-        setModal(false); setTitle(""); setContent("");
+        Alert.alert("Success", isEditing ? "Notice updated" : "Notice published");
+        setModal(false); setTitle(""); setContent(""); setEditingId(null);
         fetchNotices();
+      } else {
+        Alert.alert("Error", "Could not save notice");
       }
+    } catch {
+      Alert.alert("Error", "Network error");
     } finally { setPublishing(false); }
   };
 
@@ -73,7 +104,7 @@ export default function AdminNotices() {
         </TouchableOpacity>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Notices</Text>
-          <TouchableOpacity style={styles.newBtn} onPress={() => setModal(true)}>
+          <TouchableOpacity style={styles.newBtn} onPress={openCreateModal}>
             <Ionicons name="add" size={18} color="#0C447C" />
             <Text style={styles.newBtnText}>New</Text>
           </TouchableOpacity>
@@ -100,9 +131,14 @@ export default function AdminNotices() {
                 <View style={styles.iconWrap}>
                   <Ionicons name="megaphone-outline" size={20} color="#185FA5" />
                 </View>
-                <TouchableOpacity style={styles.deleteBtn} onPress={() => deleteNotice(item._id)}>
-                  <Ionicons name="trash-outline" size={16} color="#A32D2D" />
-                </TouchableOpacity>
+                <View style={styles.cardActions}>
+                  <TouchableOpacity style={styles.editBtn} onPress={() => openEditModal(item)}>
+                    <Ionicons name="pencil-outline" size={16} color="#0C447C" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.deleteBtn} onPress={() => deleteNotice(item._id)}>
+                    <Ionicons name="trash-outline" size={16} color="#A32D2D" />
+                  </TouchableOpacity>
+                </View>
               </View>
               <Text style={styles.nTitle}>{item.title}</Text>
               <Text style={styles.nContent}>{item.content}</Text>
@@ -110,19 +146,21 @@ export default function AdminNotices() {
                 <Ionicons name="person-outline" size={12} color="#aaa" />
                 <Text style={styles.footerText}>{item.postedBy || "Admin"}</Text>
                 <Text style={styles.dot}>·</Text>
-                <Text style={styles.footerText}>{formatDate(item.createdAt)}</Text>
+                <Text style={styles.footerText}>
+                  {item.updatedAt ? `Edited ${formatDate(item.updatedAt)}` : formatDate(item.createdAt)}
+                </Text>
               </View>
             </View>
           )}
         />
       )}
 
-      {/* New Notice Modal */}
+      {/* Create/Edit Notice Modal */}
       <Modal visible={modal} animationType="slide" transparent>
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>New Notice</Text>
+              <Text style={styles.modalTitle}>{editingId ? "Edit Notice" : "New Notice"}</Text>
               <TouchableOpacity onPress={() => setModal(false)}>
                 <Ionicons name="close" size={22} color="#555" />
               </TouchableOpacity>
@@ -150,12 +188,12 @@ export default function AdminNotices() {
 
             <TouchableOpacity
               style={[styles.publishBtn, publishing && { opacity: 0.7 }]}
-              onPress={publishNotice}
+              onPress={submitNotice}
               disabled={publishing}
             >
               {publishing
                 ? <ActivityIndicator color="#fff" />
-                : <Text style={styles.publishText}>Publish Notice</Text>
+                : <Text style={styles.publishText}>{editingId ? "Save Changes" : "Publish Notice"}</Text>
               }
             </TouchableOpacity>
 
@@ -193,6 +231,12 @@ const styles = StyleSheet.create({
   iconWrap: {
     width: 36, height: 36, borderRadius: 8,
     backgroundColor: "#E6F1FB", alignItems: "center", justifyContent: "center",
+  },
+  cardActions: { flexDirection: "row", gap: 8 },
+  editBtn: {
+    width: 34, height: 34, borderRadius: 8,
+    backgroundColor: "#E6F1FB", borderWidth: 0.5, borderColor: "#85B7EB",
+    alignItems: "center", justifyContent: "center",
   },
   deleteBtn: {
     width: 34, height: 34, borderRadius: 8,

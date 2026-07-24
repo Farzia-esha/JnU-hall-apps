@@ -128,7 +128,11 @@ export default function Students() {
   const renderItem = ({ item, index }) => {
     const color = avatarColors[index % 3];
     return (
-      <View style={styles.card}>
+      <TouchableOpacity
+        style={styles.card}
+        activeOpacity={0.7}
+        onPress={() => router.push(`/(admin)/student-details/${item._id}`)}
+      >
         <View style={[styles.avatar, { backgroundColor: color.bg }]}>
           <Text style={[styles.avatarText, { color: color.text }]}>
             {getInitials(item.name)}
@@ -157,16 +161,22 @@ export default function Students() {
           </View>
         </View>
 
-        {/* Edit + Delete Buttons */}
+        {/* Edit + Delete Buttons — stopPropagation so tap doesn't also navigate */}
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.editBtn} onPress={() => openEdit(item)}>
+          <TouchableOpacity
+            style={styles.editBtn}
+            onPress={(e) => { e.stopPropagation?.(); openEdit(item); }}
+          >
             <Ionicons name="pencil-outline" size={16} color="#0C447C" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.deleteBtn} onPress={() => deleteStudent(item._id)}>
+          <TouchableOpacity
+            style={styles.deleteBtn}
+            onPress={(e) => { e.stopPropagation?.(); deleteStudent(item._id); }}
+          >
             <Ionicons name="trash-outline" size={16} color="#A32D2D" />
           </TouchableOpacity>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
