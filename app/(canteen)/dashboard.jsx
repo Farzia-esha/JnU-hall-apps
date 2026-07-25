@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,7 +24,22 @@ export default function CanteenDashboard() {
           <Text style={styles.greeting}>Welcome back,</Text>
           <Text style={styles.name}>{user?.fullName || "Canteen Manager"}</Text>
         </View>
-        <TouchableOpacity style={styles.logoutBtn} onPress={async () => { await logout(); router.replace("/login"); }}>
+        <TouchableOpacity
+          style={styles.logoutBtn}
+          onPress={() => {
+            Alert.alert("Logout", "Are you sure you want to logout?", [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Logout",
+                style: "destructive",
+                onPress: async () => {
+                  await logout();
+                  router.replace("/login");
+                },
+              },
+            ]);
+          }}
+        >
           <Ionicons name="log-out-outline" size={18} color="#fff" />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
@@ -61,7 +76,7 @@ const styles = StyleSheet.create({
   name: { color: "#fff", fontSize: 22, fontWeight: "600", marginTop: 2 },
   logoutBtn: {
     flexDirection: "row", alignItems: "center", gap: 6,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "#e74c3c",
     borderWidth: 1, borderColor: "rgba(255,255,255,0.2)",
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
   },

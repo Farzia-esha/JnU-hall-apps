@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
@@ -63,7 +63,22 @@ export default function StudentDashboard() {
             <Text style={styles.greeting}>Welcome</Text>
             <Text style={styles.name}>{user?.fullName || "Student"}</Text>
           </View>
-          <TouchableOpacity style={styles.logoutBtn} onPress={async () => { await logout(); router.replace("/login"); }}>
+          <TouchableOpacity
+            style={styles.logoutBtn}
+            onPress={() => {
+              Alert.alert("Logout", "Are you sure you want to logout?", [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Logout",
+                  style: "destructive",
+                  onPress: async () => {
+                    await logout();
+                    router.replace("/login");
+                  },
+                },
+              ]);
+            }}
+          >
             <Ionicons name="log-out-outline" size={18} color="#fff" />
             <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
