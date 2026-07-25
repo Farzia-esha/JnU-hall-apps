@@ -177,7 +177,7 @@ export default function Signup() {
 
             {/* Logo */}
             <Image
-              source={require("./../assets/images/logo.jpg")}
+              source={require("./../assets/images/logo.png")}
               style={styles.logo}
             />
 

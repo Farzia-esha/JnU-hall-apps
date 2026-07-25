@@ -67,13 +67,13 @@ export default function Login() {
 
           {/* Logo */}
           <Image
-            source={require("./../assets/images/logo.jpg")}
+            source={require("./../assets/images/logo.png")}
             style={styles.logo}
           />
 
           {/* Title */}
           <Text style={styles.title}>NFC Hall Login</Text>
-          <Text style={styles.subtitle}>Welcome back</Text>
+          <Text style={styles.subtitle}>Welcome</Text>
 
           {/* Email Input */}
           <TextInput

@@ -7,23 +7,25 @@ import { BASE_URL } from "../../constants/api";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function CanteenNotices() {
-  const [notices, setNotices] = useState([]);
+// Hall Rep: view-only list of canteen feedback submitted by students.
+export default function HallRepCanteenFeedback() {
+  const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    fetch(`${BASE_URL}/api/notices`)
+  const fetchFeedback = () => {
+    setLoading(true);
+    fetch(`${BASE_URL}/api/canteen/feedback`)
       .then(res => res.json())
-      .then(data => { setNotices(Array.isArray(data) ? data : []); setLoading(false); })
+      .then(data => { setFeedbacks(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { fetchFeedback(); }, []);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
-    return new Date(dateStr).toLocaleDateString("en-GB", {
-      day: "numeric", month: "short", year: "numeric"
-    });
+    return new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
   };
 
   return (
@@ -35,41 +37,50 @@ export default function CanteenNotices() {
           <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>Notices</Text>
+          <Text style={styles.title}>Canteen Feedback</Text>
           {!loading && (
             <View style={styles.countBadge}>
-              <Text style={styles.countText}>{notices.length} total</Text>
+              <Text style={styles.countText}>{feedbacks.length} total</Text>
             </View>
           )}
         </View>
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#185FA5" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color="#0F6E56" style={{ marginTop: 40 }} />
       ) : (
         <FlatList
-          data={notices}
+          data={feedbacks}
           keyExtractor={item => item._id}
           contentContainerStyle={{ padding: 14, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
+          onRefresh={fetchFeedback}
+          refreshing={false}
           ListEmptyComponent={
             <View style={styles.emptyBox}>
-              <Ionicons name="megaphone-outline" size={48} color="#ccc" />
-              <Text style={styles.emptyText}>No notices yet</Text>
+              <Ionicons name="restaurant-outline" size={48} color="#ccc" />
+              <Text style={styles.emptyText}>No feedback yet</Text>
             </View>
           }
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.cardTop}>
                 <View style={styles.iconWrap}>
-                  <Ionicons name="megaphone-outline" size={18} color="#185FA5" />
+                  <Ionicons name="restaurant-outline" size={16} color="#0F6E56" />
                 </View>
+                {item.rating != null && (
+                  <View style={styles.ratingPill}>
+                    <Ionicons name="star" size={12} color="#B8860B" />
+                    <Text style={styles.ratingText}>{item.rating}/5</Text>
+                  </View>
+                )}
               </View>
-              <Text style={styles.nTitle}>{item.title}</Text>
-              <Text style={styles.nContent}>{item.content}</Text>
-              <View style={styles.cardFooter}>
+              {item.message && <Text style={styles.message}>{item.message}</Text>}
+              <View style={styles.footer}>
                 <Ionicons name="person-outline" size={12} color="#aaa" />
-                <Text style={styles.footerText}>{item.postedBy || "Admin"}</Text>
+                <Text style={styles.footerText}>
+                  {item.studentName || item.studentEmail || item.name || "Anonymous"}
+                </Text>
                 <Text style={styles.dot}>·</Text>
                 <Text style={styles.footerText}>{formatDate(item.createdAt)}</Text>
               </View>
@@ -101,15 +112,19 @@ const styles = StyleSheet.create({
     borderWidth: 0.5, borderColor: "#e0e0e0",
     padding: 14, marginBottom: 10,
   },
-  cardTop: { marginBottom: 10 },
+  cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   iconWrap: {
     width: 36, height: 36, borderRadius: 8,
-    backgroundColor: "#E6F1FB",
+    backgroundColor: "#E1F5EE",
     alignItems: "center", justifyContent: "center",
   },
-  nTitle: { fontSize: 15, fontWeight: "600", color: "#1a1a1a", marginBottom: 6 },
-  nContent: { fontSize: 14, color: "#555", lineHeight: 20 },
-  cardFooter: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 12 },
+  ratingPill: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: "#FDF3DD", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20,
+  },
+  ratingText: { fontSize: 12, fontWeight: "600", color: "#B8860B" },
+  message: { fontSize: 14, color: "#444", lineHeight: 20 },
+  footer: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 12 },
   footerText: { fontSize: 12, color: "#aaa" },
   dot: { fontSize: 12, color: "#aaa" },
 
