@@ -130,7 +130,6 @@ export default function StudentCanteen() {
           style={styles.feedbackBtn}
           onPress={() => setFeedbackModal(true)}
         >
-          {/* <Ionicons name="chatbubble-outline" size={18} color="#0F6E56" /> */}
           <Text style={styles.feedbackBtnText}>Give Feedback on Today's Food</Text>
         </TouchableOpacity>
 

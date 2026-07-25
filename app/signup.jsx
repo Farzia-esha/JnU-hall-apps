@@ -93,7 +93,6 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      // Backend signup directly (no Firebase)
       const signupResponse = await fetch(`${BASE_URL}/api/auth/signup`, {
         method: "POST",
         headers: {

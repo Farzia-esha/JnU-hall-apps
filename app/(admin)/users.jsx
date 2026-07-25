@@ -10,7 +10,6 @@ import { Ionicons } from "@expo/vector-icons";
 
 const roles = [
   { key: "student",         label: "Student",         icon: "school-outline",    color: "#E6F1FB", iconColor: "#185FA5" },
-  { key: "admin",           label: "Admin",           icon: "shield-outline",    color: "#FAEEDA", iconColor: "#854F0B" },
   { key: "accountant",      label: "Accountant",      icon: "wallet-outline",    color: "#E1F5EE", iconColor: "#0F6E56" },
   { key: "canteen_manager", label: "Canteen Manager", icon: "restaurant-outline",color: "#E6F1FB", iconColor: "#185FA5" },
   { key: "hall_rep",        label: "Hall Rep",        icon: "calendar-outline",  color: "#E1F5EE", iconColor: "#0F6E56" },

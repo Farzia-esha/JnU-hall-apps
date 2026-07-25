@@ -12,8 +12,6 @@ export default function Students() {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-
-  // Edit modal state
   const [editModal, setEditModal] = useState(false);
   const [editStudent, setEditStudent] = useState(null);
   const [editForm, setEditForm] = useState({});

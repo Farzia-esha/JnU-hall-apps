@@ -19,30 +19,6 @@ export default function AdminDashboard() {
     useCallback(() => { fetchStats(); }, [])
   );
 
-  // const fetchStats = async () => {
-  //   setStatsLoading(true);
-  //   try {
-  //     const [studentsRes, applicationsRes, noticesRes] = await Promise.all([
-  //       fetch(`${BASE_URL}/api/admin/students`),
-  //       fetch(`${BASE_URL}/api/admin/applications`),
-  //       fetch(`${BASE_URL}/api/notices`),
-  //     ]);
-  //     const students = await studentsRes.json();
-  //     const applications = await applicationsRes.json();
-  //     const notices = await noticesRes.json();
-
-  //     setStudentCount(Array.isArray(students) ? students.length : 0);
-  //     setApplicationCount(Array.isArray(applications) ? applications.length : 0);
-  //     setVacantSeatCount(Array.isArray(notices) ? notices.length : 0);
-  //   } catch {
-  //     setStudentCount(0);
-  //     setApplicationCount(0);
-  //     setVacantSeatCount(0);
-  //   } finally {
-  //     setStatsLoading(false);
-  //   }
-  // };
-
   const fetchStats = async () => {
     setStatsLoading(true);
     try {
@@ -100,9 +76,10 @@ export default function AdminDashboard() {
     { title: "Application Time", sub: "Set open/close dates",    icon: "time-outline",           color: "#E6F1FB", iconColor: "#185FA5", route: "/(admin)/application-settings" },
     { title: "Applications",     sub: "Review & allocate seats", icon: "document-text-outline", color: "#FAEEDA", iconColor: "#854F0B", route: "/(admin)/applications" },
     { title: "Seat Inventory",   sub: "Manage rooms & seats",    icon: "bed-outline",            color: "#E1F5EE", iconColor: "#0F6E56", route: "/(admin)/seats" },
-    { title: "Complaints",       sub: "Review & resolve",    icon: "chatbox-ellipses-outline",color: "#E6F1FB", iconColor: "#185FA5", route: "/(admin)/complaints" },
+    { title: "Complaints",       sub: "Review & resolve",       icon: "chatbox-ellipses-outline",color: "#E6F1FB", iconColor: "#185FA5", route: "/(admin)/complaints" },
     { title: "Payments",         sub: "Dues & payment history",  icon: "wallet-outline",         color: "#FAEEDA", iconColor: "#854F0B", route: "/(admin)/payments" },
-    { title: "Events",           sub: "Monitor & override",      icon: "calendar-outline",       color: "#E1F5EE", iconColor: "#0F6E56", route: "/(admin)/events" },
+    { title: "Events",           sub: "Monitor & override",      icon: "calendar-outline",       color: "#E1F5EE", iconColor: "#0F6E56", route: "/(hallrep)/events" },
+    { title: "canteen Menu",     sub: "Manage daily menu",       icon: "restaurant-outline",     color: "#E6F1FB", iconColor: "#185FA5", route: "/(canteen)/canteen" },
   ];
 
   return (
