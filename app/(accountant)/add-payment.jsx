@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity, TextInput,
-  ScrollView, ActivityIndicator, Alert, Modal, FlatList
+  ScrollView, ActivityIndicator, Alert, Modal, FlatList, KeyboardAvoidingView, Platform
 } from "react-native";
 import { BASE_URL } from "../../constants/api";
 import { useRouter } from "expo-router";
@@ -81,7 +81,7 @@ export default function AddPayment() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={16} color="rgba(255,255,255,0.8)" />
@@ -91,7 +91,7 @@ export default function AddPayment() {
         <Text style={styles.subtitle}>Create a new payment record for a student</Text>
       </View>
 
-      <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.form} contentContainerStyle={styles.formContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Text style={styles.fieldLabel}>Student</Text>
         <TouchableOpacity style={styles.studentPicker} onPress={openStudentPicker}>
           {selectedStudent ? (
@@ -195,7 +195,7 @@ export default function AddPayment() {
           </View>
         </View>
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -207,7 +207,8 @@ const styles = StyleSheet.create({
   title: { color: "#fff", fontSize: 22, fontWeight: "600" },
   subtitle: { color: "rgba(255,255,255,0.55)", fontSize: 13, marginTop: 4 },
 
-  form: { padding: 16 },
+  form: { flex: 1 },
+  formContent: { padding: 16, paddingBottom: 40 },
   fieldLabel: { fontSize: 13, color: "#555", marginBottom: 6, fontWeight: "500" },
   input: { backgroundColor: "#fff", borderRadius: 10, borderWidth: 0.5, borderColor: "#e0e0e0", padding: 13, fontSize: 14, color: "#333" },
 

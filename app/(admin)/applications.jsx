@@ -19,6 +19,7 @@ export default function AdminApplications() {
   const [filter, setFilter] = useState("pending");
 
   const [seatModal, setSeatModal] = useState(false);
+  const [seatModalMode, setSeatModalMode] = useState("approve"); // "approve" or "assign"
   const [selectedApp, setSelectedApp] = useState(null);
   const [vacantSeats, setVacantSeats] = useState([]);
   const [loadingSeats, setLoadingSeats] = useState(false);
@@ -37,12 +38,9 @@ export default function AdminApplications() {
 
   useFocusEffect(useCallback(() => { fetchApplications(); }, [filter]));
 
-  const openSeatPicker = async (application) => {
-    if (application.paymentStatus !== "paid") {
-      Alert.alert("Fee not paid", "This student hasn't paid the application fee yet.");
-      return;
-    }
+  const openSeatPicker = async (application, mode = "approve") => {
     setSelectedApp(application);
+    setSeatModalMode(mode);
     setSeatModal(true);
     setLoadingSeats(true);
     try {
@@ -58,24 +56,67 @@ export default function AdminApplications() {
   const approveWithSeat = async (seat) => {
     setApproving(true);
     try {
-      const res = await fetch(`${BASE_URL}/api/admin/applications/${selectedApp._id}/approve`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ seatId: seat._id }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        Alert.alert("Error", data.message || "Could not approve");
-        return;
+      if (seatModalMode === "assign") {
+        // Post-payment seat assignment
+        const res = await fetch(`${BASE_URL}/api/admin/applications/${selectedApp._id}/assign-seat`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ seatId: seat._id }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          Alert.alert("Error", `[assign-seat] ${data.message || "Could not assign seat"}`);
+          return;
+        }
+        Alert.alert("Success", `Seat assigned to ${selectedApp.studentName}! ${seat.hallName} / Room ${seat.roomNumber} / Seat ${seat.seatNumber}`);
+      } else {
+        // Approval with pre-selected seat
+        const res = await fetch(`${BASE_URL}/api/admin/applications/${selectedApp._id}/approve`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ seatId: seat._id, eligibilityNotes: "" }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          Alert.alert("Error", `[approve] ${data.message || "Could not approve"}`);
+          return;
+        }
+        Alert.alert("Approved", `${selectedApp.studentName} approved! Seat ${seat.hallName} / Room ${seat.roomNumber} / Seat ${seat.seatNumber} is reserved until payment.`);
       }
-      Alert.alert("Approved", `Seat ${seat.hallName} / Room ${seat.roomNumber} / Seat ${seat.seatNumber} allocated.`);
       setSeatModal(false);
       fetchApplications();
-    } catch {
-      Alert.alert("Error", "Network error");
+    } catch (err) {
+      Alert.alert("Error", `Network error: ${err.message}`);
     } finally {
       setApproving(false);
     }
+  };
+
+  const approveWithoutSeat = async (application) => {
+    Alert.alert("Approve without seat?", "This student can pay and choose their seat. Continue?", [
+      { text: "Cancel" },
+      {
+        text: "Approve",
+        onPress: async () => {
+          try {
+            const res = await fetch(`${BASE_URL}/api/admin/applications/${application._id}/approve`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ eligibilityNotes: "" }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              Alert.alert("Error", data.message || "Could not approve");
+              return;
+            }
+            Alert.alert("Approved", `${application.studentName} has been approved. They can now pay the fee.`);
+            fetchApplications();
+          } catch {
+            Alert.alert("Error", "Network error");
+          }
+        }
+      }
+    ]);
   };
 
   const rejectApplication = (id) => {
@@ -145,7 +186,7 @@ export default function AdminApplications() {
                   </View>
                   <View style={[styles.payBadge, { backgroundColor: item.paymentStatus === "paid" ? "#E1F5EE" : "#FCEBEB" }]}>
                     <Text style={{ fontSize: 11, color: item.paymentStatus === "paid" ? "#085041" : "#A32D2D" }}>
-                      {item.paymentStatus === "paid" ? "Fee paid" : "Fee unpaid"}
+                      {item.paymentStatus === "paid" ? "✓ Fee paid" : "◦ Fee unpaid"}
                     </Text>
                   </View>
                   <Text style={styles.dateText}>{formatDate(item.createdAt)}</Text>
@@ -155,27 +196,56 @@ export default function AdminApplications() {
                 <Text style={styles.meta}>{item.studentId} · {item.department} · {item.session}</Text>
                 <Text style={styles.meta}>{item.studentEmail}</Text>
 
-                {item.status === "approved" && (
+                {item.status === "approved" && item.selectedHallName && (
                   <Text style={styles.seatInfo}>
+                    Reserved: {item.selectedHallName} · Room {item.selectedRoomNumber} · Seat {item.selectedSeatNumber}
+                  </Text>
+                )}
+
+                {item.status === "approved" && item.paymentStatus === "paid" && (
+                  <Text style={styles.seatInfoPaid}>
                     Allocated: {item.hallName} · Room {item.roomNumber} · Seat {item.seatNumber}
                   </Text>
+                )}
+
+                {item.status === "approved" && item.paymentStatus === "unpaid" && !item.selectedHallName && (
+                  <Text style={styles.statusMsg}>Awaiting student payment...</Text>
                 )}
 
                 {item.status === "pending" && (
                   <View style={styles.actions}>
                     <TouchableOpacity
-                      style={[styles.actionBtn, { backgroundColor: "#E1F5EE", borderColor: "#5DCAA5" }]}
-                      onPress={() => openSeatPicker(item)}
+                      style={[styles.actionBtn, styles.actionBtnPrimary]}
+                      onPress={() => openSeatPicker(item, "approve")}
                     >
                       <Ionicons name="checkmark-circle-outline" size={14} color="#085041" />
-                      <Text style={[styles.actionText, { color: "#085041" }]}>Approve & Allocate Seat</Text>
+                      <Text style={[styles.actionText, { color: "#085041" }]}>Approve + Select Seat</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.actionBtn, { backgroundColor: "#FCEBEB", borderColor: "#F09595" }]}
+                      style={[styles.actionBtn, styles.actionBtnSecondary]}
+                      onPress={() => approveWithoutSeat(item)}
+                    >
+                      <Ionicons name="checkmark-outline" size={14} color="#0C447C" />
+                      <Text style={[styles.actionText, { color: "#0C447C" }]}>Approve</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.actionBtn, styles.actionBtnReject]}
                       onPress={() => rejectApplication(item._id)}
                     >
                       <Ionicons name="close-circle-outline" size={14} color="#A32D2D" />
                       <Text style={[styles.actionText, { color: "#A32D2D" }]}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {item.status === "approved" && item.paymentStatus === "paid" && !item.hallName && (
+                  <View style={styles.actions}>
+                    <TouchableOpacity
+                      style={[styles.actionBtn, styles.actionBtnSuccess]}
+                      onPress={() => openSeatPicker(item, "assign")}
+                    >
+                      <Ionicons name="bed-outline" size={14} color="#085041" />
+                      <Text style={[styles.actionText, { color: "#085041" }]}>Assign Seat Now</Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -190,7 +260,12 @@ export default function AdminApplications() {
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Choose a vacant seat</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalTitle}>
+                  {seatModalMode === "assign" ? "Assign a seat (payment received)" : "Select a seat for approval"}
+                </Text>
+                <Text style={styles.modalSubtitle}>{selectedApp?.studentName}</Text>
+              </View>
               <TouchableOpacity onPress={() => setSeatModal(false)}>
                 <Ionicons name="close" size={22} color="#555" />
               </TouchableOpacity>
@@ -252,10 +327,16 @@ const styles = StyleSheet.create({
 
   name: { fontSize: 15, fontWeight: "600", color: "#1a1a1a" },
   meta: { fontSize: 12, color: "#888", marginTop: 2 },
-  seatInfo: { fontSize: 13, color: "#085041", marginTop: 8, fontWeight: "500" },
+  seatInfo: { fontSize: 13, color: "#0C5C4B", marginTop: 8, fontWeight: "500" },
+  seatInfoPaid: { fontSize: 13, color: "#085041", marginTop: 8, fontWeight: "600", backgroundColor: "#E8F8F5", padding: 8, borderRadius: 6 },
+  statusMsg: { fontSize: 12, color: "#9C7A00", marginTop: 8, fontStyle: "italic" },
 
-  actions: { flexDirection: "row", gap: 8, marginTop: 12 },
-  actionBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5, padding: 9, borderRadius: 10, borderWidth: 0.5 },
+  actions: { flexDirection: "row", gap: 6, marginTop: 12, flexWrap: "wrap" },
+  actionBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 5, padding: 9, borderRadius: 10, borderWidth: 0.5, flex: 1, minWidth: 120 },
+  actionBtnPrimary: { backgroundColor: "#E1F5EE", borderColor: "#5DCAA5" },
+  actionBtnSecondary: { backgroundColor: "#E6F1FB", borderColor: "#85B7EB" },
+  actionBtnSuccess: { backgroundColor: "#E1F5EE", borderColor: "#5DCAA5" },
+  actionBtnReject: { backgroundColor: "#FCEBEB", borderColor: "#F09595" },
   actionText: { fontSize: 12, fontWeight: "500" },
 
   emptyBox: { alignItems: "center", marginTop: 60, gap: 10 },
@@ -263,8 +344,9 @@ const styles = StyleSheet.create({
 
   overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" },
   modalCard: { backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: "80%" },
-  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
+  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, gap: 10 },
   modalTitle: { fontSize: 18, fontWeight: "600", color: "#1a1a1a" },
+  modalSubtitle: { fontSize: 13, color: "#888", marginTop: 4 },
 
   seatOption: {
     flexDirection: "row", alignItems: "center", gap: 10,

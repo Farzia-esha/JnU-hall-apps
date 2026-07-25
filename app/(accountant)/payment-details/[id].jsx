@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, TextInput, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, TextInput, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { BASE_URL } from "../../../constants/api";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -103,72 +103,75 @@ export default function PaymentDetails() {
   const net = (Number(payment.amount) || 0) - (Number(payment.scholarshipAmount) || 0);
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={16} color="rgba(255,255,255,0.8)" />
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Payment Details</Text>
-        <View style={[styles.badge, { backgroundColor: sc.bg, marginTop: 8 }]}>
-          <Text style={{ fontSize: 13, fontWeight: "600", color: sc.text }}>{sc.label}</Text>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>STUDENT</Text>
-        <Text style={styles.bigText}>{payment.studentName || "Unknown"}</Text>
-        <Text style={styles.metaLine}>{payment.email}</Text>
-        {payment.studentId ? <Text style={styles.metaLine}>Student ID: {payment.studentId}</Text> : null}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>PAYMENT INFO</Text>
-        <View style={styles.infoRow}><Text style={styles.infoLabel}>Payment ID</Text><Text style={styles.infoValue}>{payment._id}</Text></View>
-        <View style={styles.infoRow}><Text style={styles.infoLabel}>Semester / Purpose</Text><Text style={styles.infoValue}>{payment.semester}</Text></View>
-        <View style={styles.infoRow}><Text style={styles.infoLabel}>Method</Text><Text style={styles.infoValue}>{payment.stripeSessionId ? "Stripe" : (payment.method || "Manual")}</Text></View>
-        {payment.stripeSessionId ? (
-          <View style={styles.infoRow}><Text style={styles.infoLabel}>Transaction ID</Text><Text style={styles.infoValue} numberOfLines={1}>{payment.stripeSessionId}</Text></View>
-        ) : null}
-        <View style={styles.infoRow}><Text style={styles.infoLabel}>Created</Text><Text style={styles.infoValue}>{formatDate(payment.createdAt)}</Text></View>
-        <View style={styles.infoRow}><Text style={styles.infoLabel}>Paid Date</Text><Text style={styles.infoValue}>{payment.status === "paid" ? formatDate(payment.paidAt) : "—"}</Text></View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>AMOUNT</Text>
-        <Text style={styles.fieldLabel}>Amount (৳)</Text>
-        <TextInput style={styles.input} value={editAmount} onChangeText={setEditAmount} keyboardType="numeric" />
-
-        <Text style={[styles.fieldLabel, { marginTop: 12 }]}>Scholarship Amount (৳)</Text>
-        <TextInput style={styles.input} value={editScholarship} onChangeText={setEditScholarship} keyboardType="numeric" />
-
-        <View style={styles.netRow}>
-          <Text style={styles.netLabel}>Net Payable</Text>
-          <Text style={styles.netValue}>{formatMoney(net)}</Text>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={16} color="rgba(255,255,255,0.8)" />
+            <Text style={styles.backText}>Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Payment Details</Text>
+          <View style={[styles.badge, { backgroundColor: sc.bg, marginTop: 8 }]}>
+            <Text style={{ fontSize: 13, fontWeight: "600", color: sc.text }}>{sc.label}</Text>
+          </View>
         </View>
 
-        {updating ? (
-          <ActivityIndicator color="#185FA5" style={{ marginTop: 16 }} />
-        ) : (
-          <>
-            <TouchableOpacity style={styles.saveBtn} onPress={saveChanges}>
-              <Text style={styles.saveBtnText}>Save Changes</Text>
-            </TouchableOpacity>
-            {payment.status !== "paid" && (
-              <TouchableOpacity style={styles.markPaidBtn} onPress={markAsPaid}>
-                <Ionicons name="checkmark-circle-outline" size={16} color="#085041" />
-                <Text style={styles.markPaidText}>Mark as Paid</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>STUDENT</Text>
+          <Text style={styles.bigText}>{payment.studentName || "Unknown"}</Text>
+          <Text style={styles.metaLine}>{payment.email}</Text>
+          {payment.studentId ? <Text style={styles.metaLine}>Student ID: {payment.studentId}</Text> : null}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>PAYMENT INFO</Text>
+          <View style={styles.infoRow}><Text style={styles.infoLabel}>Payment ID</Text><Text style={styles.infoValue}>{payment._id}</Text></View>
+          <View style={styles.infoRow}><Text style={styles.infoLabel}>Semester / Purpose</Text><Text style={styles.infoValue}>{payment.semester}</Text></View>
+          <View style={styles.infoRow}><Text style={styles.infoLabel}>Method</Text><Text style={styles.infoValue}>{payment.stripeSessionId ? "Stripe" : (payment.method || "Manual")}</Text></View>
+          {payment.stripeSessionId ? (
+            <View style={styles.infoRow}><Text style={styles.infoLabel}>Transaction ID</Text><Text style={styles.infoValue} numberOfLines={1}>{payment.stripeSessionId}</Text></View>
+          ) : null}
+          <View style={styles.infoRow}><Text style={styles.infoLabel}>Created</Text><Text style={styles.infoValue}>{formatDate(payment.createdAt)}</Text></View>
+          <View style={styles.infoRow}><Text style={styles.infoLabel}>Paid Date</Text><Text style={styles.infoValue}>{payment.status === "paid" ? formatDate(payment.paidAt) : "—"}</Text></View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>AMOUNT</Text>
+          <Text style={styles.fieldLabel}>Amount (৳)</Text>
+          <TextInput style={styles.input} value={editAmount} onChangeText={setEditAmount} keyboardType="numeric" />
+
+          <Text style={[styles.fieldLabel, { marginTop: 12 }]}>Scholarship Amount (৳)</Text>
+          <TextInput style={styles.input} value={editScholarship} onChangeText={setEditScholarship} keyboardType="numeric" />
+
+          <View style={styles.netRow}>
+            <Text style={styles.netLabel}>Net Payable</Text>
+            <Text style={styles.netValue}>{formatMoney(net)}</Text>
+          </View>
+
+          {updating ? (
+            <ActivityIndicator color="#185FA5" style={{ marginTop: 16 }} />
+          ) : (
+            <>
+              <TouchableOpacity style={styles.saveBtn} onPress={saveChanges}>
+                <Text style={styles.saveBtnText}>Save Changes</Text>
               </TouchableOpacity>
-            )}
-          </>
-        )}
-      </View>
-    </ScrollView>
+              {payment.status !== "paid" && (
+                <TouchableOpacity style={styles.markPaidBtn} onPress={markAsPaid}>
+                  <Ionicons name="checkmark-circle-outline" size={16} color="#085041" />
+                  <Text style={styles.markPaidText}>Mark as Paid</Text>
+                </TouchableOpacity>
+              )}
+            </>
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f6fa" },
+  scrollContent: { flexGrow: 1, paddingBottom: 40 },
   header: { backgroundColor: "#2c3e50", paddingHorizontal: 20, paddingTop: 55, paddingBottom: 20 },
   backBtn: { flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 12 },
   backText: { color: "rgba(255,255,255,0.7)", fontSize: 13 },

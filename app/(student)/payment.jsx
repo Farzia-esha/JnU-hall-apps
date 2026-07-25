@@ -119,10 +119,14 @@ export default function StudentPayment() {
             const sc = statusConfigFor(item);
             const net = netOf(item);
             const isPaying = payingId === item._id;
+            const isHallAppFee = item.source === "hall_application";
             return (
-              <View style={styles.card}>
+              <View style={[styles.card, isHallAppFee && styles.hallAppCard]}>
                 <View style={styles.cardTop}>
-                  <Text style={styles.semester}>{item.semester || "Payment"}</Text>
+                  <View>
+                    <Text style={styles.semester}>{item.semester || "Payment"}</Text>
+                    {isHallAppFee && <Text style={styles.hallAppLabel}>Hall Seat Application</Text>}
+                  </View>
                   <View style={[styles.statusBadge, { backgroundColor: sc.bg }]}>
                     <Ionicons name={sc.icon} size={12} color={sc.text} />
                     <Text style={[styles.statusText, { color: sc.text }]}>{sc.label}</Text>
@@ -155,7 +159,7 @@ export default function StudentPayment() {
                   )
                 ) : (
                   <TouchableOpacity
-                    style={[styles.payBtn, isPaying && { opacity: 0.7 }]}
+                    style={[styles.payBtn, isHallAppFee && styles.payBtnHallApp, isPaying && { opacity: 0.7 }]}
                     onPress={() => payNow(item)}
                     disabled={isPaying || net <= 0}
                   >
@@ -198,8 +202,13 @@ const styles = StyleSheet.create({
     borderWidth: 0.5, borderColor: "#e0e0e0",
     padding: 14, marginBottom: 10,
   },
-  cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  hallAppCard: {
+    borderColor: "#85B7EB",
+    backgroundColor: "#F8FBFF",
+  },
+  cardTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12, gap: 10 },
   semester: { fontSize: 15, fontWeight: "600", color: "#1a1a1a" },
+  hallAppLabel: { fontSize: 12, color: "#0C447C", fontWeight: "500", marginTop: 2 },
   statusBadge: {
     flexDirection: "row", alignItems: "center", gap: 4,
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20,
@@ -216,7 +225,10 @@ const styles = StyleSheet.create({
 
   payBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
-    backgroundColor: "#635BFF", borderRadius: 10, padding: 12, marginTop: 12,
+    backgroundColor: "#0C5C4B", borderRadius: 10, padding: 12, marginTop: 12,
+  },
+  payBtnHallApp: {
+    backgroundColor: "#0C5C4B",
   },
   payBtnText: { color: "#fff", fontWeight: "600", fontSize: 13 },
 

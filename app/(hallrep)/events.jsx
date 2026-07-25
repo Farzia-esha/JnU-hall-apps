@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   View, Text, StyleSheet, FlatList, ActivityIndicator,
-  TouchableOpacity, Modal, TextInput, Alert
+  TouchableOpacity, Modal, TextInput, Alert, KeyboardAvoidingView, ScrollView, Platform
 } from "react-native";
 import { BASE_URL } from "../../constants/api";
 import { useRouter } from "expo-router";
@@ -235,37 +235,39 @@ export default function Events() {
       )}
 
       <Modal visible={modal} animationType="slide" transparent onRequestClose={closeModal}>
-        <View style={styles.overlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{editingId ? "Edit Event" : "New Event"}</Text>
-            {[
-              { key: "title", label: "Event Title *" },
-              { key: "date", label: "Date * (YYYY-MM-DD)" },
-              { key: "description", label: "Description" },
-              { key: "activityUpdate", label: "Activity Update" },
-            ].map(f => (
-              <TextInput
-              key={f.key}
-              placeholder={f.label}
-              style={styles.input}
-              value={form[f.key]}
-              onChangeText={v => setForm({ ...form, [f.key]: v })}
-              keyboardType={f.key === "date" ? "numbers-and-punctuation" : "default"}
-              autoCapitalize="none"
-            />
-            ))}
-            <TouchableOpacity style={[styles.submitBtn, saving && { opacity: 0.7 }]} onPress={saveEvent} disabled={saving}>
-              {saving ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.submitText}>{editingId ? "Save Changes" : "Create Event"}</Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={closeModal}>
-              <Text style={styles.cancel}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.overlay}>
+          <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>{editingId ? "Edit Event" : "New Event"}</Text>
+              {[
+                { key: "title", label: "Event Title *" },
+                { key: "date", label: "Date * (YYYY-MM-DD)" },
+                { key: "description", label: "Description" },
+                { key: "activityUpdate", label: "Activity Update" },
+              ].map(f => (
+                <TextInput
+                key={f.key}
+                placeholder={f.label}
+                style={styles.input}
+                value={form[f.key]}
+                onChangeText={v => setForm({ ...form, [f.key]: v })}
+                keyboardType={f.key === "date" ? "numbers-and-punctuation" : "default"}
+                autoCapitalize="none"
+              />
+              ))}
+              <TouchableOpacity style={[styles.submitBtn, saving && { opacity: 0.7 }]} onPress={saveEvent} disabled={saving}>
+                {saving ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.submitText}>{editingId ? "Save Changes" : "Create Event"}</Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity onPress={closeModal}>
+                <Text style={styles.cancel}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -290,7 +292,8 @@ const styles = StyleSheet.create({
   organizer: { fontSize: 12, color: "#999", marginTop: 6 },
   empty: { textAlign: "center", color: "#999", marginTop: 60, fontSize: 16 },
   error: { color: "#c0392b", textAlign: "center", marginTop: 12, marginHorizontal: 16, fontSize: 14 },
-  overlay: { flex: 1, backgroundColor: "#00000066", justifyContent: "center", padding: 20 },
+  overlay: { flex: 1, backgroundColor: "#00000066", justifyContent: "center" },
+  scrollContent: { flexGrow: 1, justifyContent: "center", padding: 20 },
   modalCard: { backgroundColor: "#fff", borderRadius: 16, padding: 24 },
   modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
   input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 10, padding: 12, marginBottom: 10, fontSize: 15 },

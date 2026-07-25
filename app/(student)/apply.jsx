@@ -111,9 +111,12 @@ export default function ApplyForHall() {
       const statusRes = await fetch(`${BASE_URL}/api/payments/session-status/${data.sessionId}`);
       const statusData = await statusRes.json();
       if (statusData.status === "paid") {
-        Alert.alert("Payment received", "Your application fee has been paid.");
+        Alert.alert("Payment received", "Your application fee has been paid.", [
+          { text: "OK", onPress: () => router.push("/(student)/payment") }
+        ]);
+      } else {
+        load();
       }
-      load();
     } catch {
       Alert.alert("Error", "Payment could not be started");
     } finally {
@@ -217,13 +220,38 @@ export default function ApplyForHall() {
             )
           )}
 
-          {/* Pending, unpaid -> ask for payment */}
+          {/* Pending, unpaid -> ask for payment first */}
           {application?.status === "pending" && application.paymentStatus !== "paid" && (
             <View style={styles.statusCard}>
               <Ionicons name="time-outline" size={22} color="#633806" />
               <Text style={styles.statusTitle}>Application submitted</Text>
-              <Text style={styles.statusSub}>Pay the application fee to send this for admin review.</Text>
-              <Text style={styles.statusSub}>You can also check "Payments" for this fee's due/paid status.</Text>
+              <Text style={styles.statusSub}>Waiting for admin to review your eligibility...</Text>
+              <Text style={styles.statusSubSmall}>Once approved, you can pay to claim your seat.</Text>
+            </View>
+          )}
+
+          {/* Pending, paid -> shouldn't happen in new workflow, but keep for safety */}
+          {application?.status === "pending" && application.paymentStatus === "paid" && (
+            <View style={styles.statusCard}>
+              <Ionicons name="hourglass-outline" size={22} color="#185FA5" />
+              <Text style={styles.statusTitle}>Awaiting admin approval</Text>
+              <Text style={styles.statusSub}>Your fee has been received. Waiting for seat allocation...</Text>
+            </View>
+          )}
+
+          {/* Approved, unpaid -> ready to pay */}
+          {application?.status === "approved" && application.paymentStatus === "unpaid" && (
+            <View style={[styles.statusCard, { backgroundColor: "#FFF8E7", borderColor: "#FFC107" }]}>
+              <Ionicons name="star-outline" size={22} color="#F57C00" />
+              <Text style={[styles.statusTitle, { color: "#F57C00" }]}>You've been approved!</Text>
+              <Text style={[styles.statusSub, { color: "#666" }]}>
+                Pay the application fee to confirm your seat reservation.
+              </Text>
+              {application.selectedHallName && (
+                <Text style={[styles.statusSub, { color: "#666", marginTop: 6 }]}>
+                  Reserved: {application.selectedHallName} · Room {application.selectedRoomNumber} · Seat {application.selectedSeatNumber}
+                </Text>
+              )}
               <TouchableOpacity
                 style={[styles.payBtn, paying && { opacity: 0.7 }]}
                 onPress={payFee}
@@ -234,21 +262,15 @@ export default function ApplyForHall() {
             </View>
           )}
 
-          {/* Pending, paid -> waiting on admin */}
-          {application?.status === "pending" && application.paymentStatus === "paid" && (
-            <View style={styles.statusCard}>
-              <Ionicons name="hourglass-outline" size={22} color="#185FA5" />
-              <Text style={styles.statusTitle}>Awaiting admin approval</Text>
-              <Text style={styles.statusSub}>Your fee has been received. You'll be notified once a seat is allocated.</Text>
-            </View>
-          )}
-
-          {/* Approved */}
-          {application?.status === "approved" && (
+          {/* Approved, paid -> seat assigned */}
+          {application?.status === "approved" && application.paymentStatus === "paid" && (
             <View style={[styles.statusCard, { backgroundColor: "#E1F5EE", borderColor: "#5DCAA5" }]}>
               <Ionicons name="checkmark-circle-outline" size={22} color="#085041" />
-              <Text style={[styles.statusTitle, { color: "#085041" }]}>Seat allocated!</Text>
-              <Text style={styles.statusSub}>
+              <Text style={[styles.statusTitle, { color: "#085041" }]}>Seat allocated! 🎉</Text>
+              <Text style={[styles.statusSub, { color: "#666" }]}>
+                Congratulations! Your seat has been confirmed.
+              </Text>
+              <Text style={[styles.statusSub, { color: "#085041", fontWeight: "600", marginTop: 8 }]}>
                 {application.hallName} · Room {application.roomNumber} · Seat {application.seatNumber}
               </Text>
             </View>
@@ -304,6 +326,7 @@ const styles = StyleSheet.create({
   },
   statusTitle: { fontSize: 16, fontWeight: "600", color: "#633806", marginTop: 4 },
   statusSub: { fontSize: 13, color: "#666", textAlign: "center", lineHeight: 18 },
+  statusSubSmall: { fontSize: 12, color: "#999", textAlign: "center", lineHeight: 16, marginTop: 2 },
   payBtn: { backgroundColor: "#635BFF", padding: 14, borderRadius: 12, marginTop: 10, alignSelf: "stretch", alignItems: "center" },
   payBtnText: { color: "#fff", fontWeight: "600", fontSize: 14 },
 });

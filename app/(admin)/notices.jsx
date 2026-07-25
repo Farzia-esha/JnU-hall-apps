@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, Alert, Modal, ActivityIndicator
+  TextInput, Alert, Modal, ActivityIndicator, KeyboardAvoidingView, ScrollView, Platform
 } from "react-native";
 import { BASE_URL } from "../../constants/api";
 import { useRouter } from "expo-router";
@@ -157,51 +157,53 @@ export default function AdminNotices() {
 
       {/* Create/Edit Notice Modal */}
       <Modal visible={modal} animationType="slide" transparent>
-        <View style={styles.overlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{editingId ? "Edit Notice" : "New Notice"}</Text>
-              <TouchableOpacity onPress={() => setModal(false)}>
-                <Ionicons name="close" size={22} color="#555" />
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.overlay}>
+          <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+            <View style={styles.modalCard}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>{editingId ? "Edit Notice" : "New Notice"}</Text>
+                <TouchableOpacity onPress={() => setModal(false)}>
+                  <Ionicons name="close" size={22} color="#555" />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.fieldLabel}>Title</Text>
+              <TextInput
+                placeholder="Enter notice title"
+                placeholderTextColor="#ccc"
+                style={styles.input}
+                value={title}
+                onChangeText={setTitle}
+              />
+
+              <Text style={styles.fieldLabel}>Content</Text>
+              <TextInput
+                placeholder="Write notice content..."
+                placeholderTextColor="#ccc"
+                style={[styles.input, styles.textArea]}
+                value={content}
+                onChangeText={setContent}
+                multiline
+                textAlignVertical="top"
+              />
+
+              <TouchableOpacity
+                style={[styles.publishBtn, publishing && { opacity: 0.7 }]}
+                onPress={submitNotice}
+                disabled={publishing}
+              >
+                {publishing
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.publishText}>{editingId ? "Save Changes" : "Publish Notice"}</Text>
+                }
               </TouchableOpacity>
-            </View>
 
-            <Text style={styles.fieldLabel}>Title</Text>
-            <TextInput
-              placeholder="Enter notice title"
-              placeholderTextColor="#ccc"
-              style={styles.input}
-              value={title}
-              onChangeText={setTitle}
-            />
-
-            <Text style={styles.fieldLabel}>Content</Text>
-            <TextInput
-              placeholder="Write notice content..."
-              placeholderTextColor="#ccc"
-              style={[styles.input, styles.textArea]}
-              value={content}
-              onChangeText={setContent}
-              multiline
-              textAlignVertical="top"
-            />
-
-            <TouchableOpacity
-              style={[styles.publishBtn, publishing && { opacity: 0.7 }]}
-              onPress={submitNotice}
-              disabled={publishing}
-            >
-              {publishing
-                ? <ActivityIndicator color="#fff" />
-                : <Text style={styles.publishText}>{editingId ? "Save Changes" : "Publish Notice"}</Text>
-              }
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.cancelBtn} onPress={() => setModal(false)}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setModal(false)}>
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
-          </View>
-        </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
 
     </View>
@@ -252,7 +254,8 @@ const styles = StyleSheet.create({
   emptyBox: { alignItems: "center", marginTop: 60, gap: 10 },
   emptyText: { fontSize: 15, color: "#bbb" },
 
-  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" },
+  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "center" },
+  scrollContent: { flexGrow: 1, justifyContent: "center", padding: 20 },
   modalCard: {
     backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20,
     padding: 20,
