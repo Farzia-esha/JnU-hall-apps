@@ -21,7 +21,7 @@ export default function CanteenDashboard() {
 
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Welcome back,</Text>
+          <Text style={styles.greeting}>Welcome</Text>
           <Text style={styles.name}>{user?.fullName || "Canteen Manager"}</Text>
         </View>
         <TouchableOpacity
