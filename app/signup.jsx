@@ -184,6 +184,9 @@ export default function Signup() {
             {/* Title */}
             <Text style={styles.title}>Create Account</Text>
             <Text style={styles.subtitle}>Join NFC Hall Community</Text>
+            <Text style={styles.helperText}>
+              Please fill in your details below to create an account.
+            </Text>
 
             {/* Full Name Input */}
             <View style={styles.inputWrapper}>
@@ -194,7 +197,8 @@ export default function Signup() {
                 style={styles.inputIcon}
               />
               <TextInput
-                placeholder="Full Name"
+                placeholder="Enter your full name"
+                placeholderTextColor="#000"
                 style={styles.input}
                 value={fullName}
                 onChangeText={setFullName}
@@ -211,7 +215,8 @@ export default function Signup() {
                 style={styles.inputIcon}
               />
               <TextInput
-                placeholder="Email Address"
+                placeholder="Enter your email"
+                placeholderTextColor="#000"
                 style={styles.input}
                 value={email}
                 onChangeText={setEmail}
@@ -231,6 +236,7 @@ export default function Signup() {
               />
               <TextInput
                 placeholder="Phone Number"
+                placeholderTextColor="#000"
                 style={styles.input}
                 value={phone}
                 onChangeText={setPhone}
@@ -249,6 +255,7 @@ export default function Signup() {
               />
               <TextInput
                 placeholder="Password"
+                placeholderTextColor="#000"
                 secureTextEntry={!showPassword}
                 style={[styles.input, { paddingRight: 40 }]}
                 value={password}
@@ -277,6 +284,7 @@ export default function Signup() {
               />
               <TextInput
                 placeholder="Confirm Password"
+                placeholderTextColor="#000"
                 secureTextEntry={!showConfirmPassword}
                 style={[styles.input, { paddingRight: 40 }]}
                 value={confirmPassword}
@@ -356,8 +364,15 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: "center",
     color: "#666",
-    marginBottom: 25,
+    marginBottom: 8,
     fontSize: 14,
+  },
+
+  helperText: {
+    textAlign: "center",
+    color: "#4b5563",
+    fontSize: 13,
+    marginBottom: 18,
   },
 
   inputWrapper: {

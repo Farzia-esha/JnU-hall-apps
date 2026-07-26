@@ -78,6 +78,7 @@ export default function Login() {
           {/* Email Input */}
           <TextInput
             placeholder="Enter Email"
+            placeholderTextColor="#6b7280"
             style={styles.input}
             value={email}
             onChangeText={setEmail}
@@ -90,6 +91,7 @@ export default function Login() {
           <View style={styles.passwordContainer}>
             <TextInput
               placeholder="Enter Password"
+              placeholderTextColor="#6b7280"
               secureTextEntry={!showPassword}
               style={styles.passwordInput}
               value={password}
