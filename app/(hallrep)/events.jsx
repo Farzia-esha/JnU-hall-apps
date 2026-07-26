@@ -248,11 +248,13 @@ export default function Events() {
                 <TextInput
                 key={f.key}
                 placeholder={f.label}
+                placeholderTextColor="#111827"
                 style={styles.input}
                 value={form[f.key]}
                 onChangeText={v => setForm({ ...form, [f.key]: v })}
                 keyboardType={f.key === "date" ? "numbers-and-punctuation" : "default"}
                 autoCapitalize="none"
+                color="#000000"
               />
               ))}
               <TouchableOpacity style={[styles.submitBtn, saving && { opacity: 0.7 }]} onPress={saveEvent} disabled={saving}>
@@ -296,7 +298,7 @@ const styles = StyleSheet.create({
   scrollContent: { flexGrow: 1, justifyContent: "center", padding: 20 },
   modalCard: { backgroundColor: "#fff", borderRadius: 16, padding: 24 },
   modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
-  input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 10, padding: 12, marginBottom: 10, fontSize: 15 },
+  input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 10, padding: 12, marginBottom: 10, fontSize: 15, backgroundColor: "#ffffff", color: "#000000" },
   submitBtn: { backgroundColor: "#16a085", padding: 14, borderRadius: 10, alignItems: "center", marginBottom: 10 },
   submitText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
   cancel: { textAlign: "center", color: "#999", fontSize: 15 },

@@ -31,8 +31,12 @@ export default function AdminDashboard() {
       const applications = await applicationsRes.json();
       const vacantSeats = await seatsRes.json();
 
+      const pendingApplications = Array.isArray(applications)
+        ? applications.filter((app) => (app?.status || "").toLowerCase() === "pending")
+        : [];
+
       setStudentCount(Array.isArray(students) ? students.length : 0);
-      setApplicationCount(Array.isArray(applications) ? applications.length : 0);
+      setApplicationCount(pendingApplications.length);
       setVacantSeatCount(Array.isArray(vacantSeats) ? vacantSeats.length : 0);
     } catch {
       setStudentCount(0);

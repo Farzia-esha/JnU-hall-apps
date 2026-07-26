@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, Modal, ActivityIndicator, Alert
+  TextInput, Modal, ActivityIndicator, Alert, KeyboardAvoidingView,
+  ScrollView, Platform
 } from "react-native";
 import { BASE_URL } from "../../constants/api";
 import { useRouter, useFocusEffect } from "expo-router";
@@ -130,38 +131,47 @@ export default function SeatInventory() {
         />
       )}
 
-      <Modal visible={modal} animationType="slide" transparent>
-        <View style={styles.overlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add Seat</Text>
-              <TouchableOpacity onPress={() => setModal(false)}>
-                <Ionicons name="close" size={22} color="#555" />
+      <Modal visible={modal} animationType="slide" transparent onRequestClose={() => setModal(false)}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.overlay}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.modalCard}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Add Seat</Text>
+                <TouchableOpacity onPress={() => setModal(false)}>
+                  <Ionicons name="close" size={22} color="#555" />
+                </TouchableOpacity>
+              </View>
+
+              {[
+                { key: "hallName", label: "Hall Name" },
+                { key: "roomNumber", label: "Room Number" },
+                { key: "seatNumber", label: "Seat Number" },
+              ].map(f => (
+                <View key={f.key} style={{ marginBottom: 12 }}>
+                  <Text style={styles.fieldLabel}>{f.label}</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={form[f.key]}
+                    onChangeText={val => setForm(prev => ({ ...prev, [f.key]: val }))}
+                    placeholder={f.label}
+                    placeholderTextColor="#999"
+                    autoCapitalize="none"
+                  />
+                </View>
+              ))}
+
+              <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.7 }]} onPress={addSeat} disabled={saving}>
+                {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Add Seat</Text>}
               </TouchableOpacity>
             </View>
-
-            {[
-              { key: "hallName", label: "Hall Name" },
-              { key: "roomNumber", label: "Room Number" },
-              { key: "seatNumber", label: "Seat Number" },
-            ].map(f => (
-              <View key={f.key} style={{ marginBottom: 12 }}>
-                <Text style={styles.fieldLabel}>{f.label}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={form[f.key]}
-                  onChangeText={val => setForm(prev => ({ ...prev, [f.key]: val }))}
-                  placeholder={f.label}
-                  placeholderTextColor="#ccc"
-                />
-              </View>
-            ))}
-
-            <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.7 }]} onPress={addSeat} disabled={saving}>
-              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Add Seat</Text>}
-            </TouchableOpacity>
-          </View>
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </Modal>
 
     </View>
@@ -195,7 +205,8 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 15, color: "#bbb" },
 
   overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" },
-  modalCard: { backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 },
+  scrollContent: { flexGrow: 1, justifyContent: "flex-end", padding: 0 },
+  modalCard: { backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, paddingBottom: 28 },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
   modalTitle: { fontSize: 18, fontWeight: "600", color: "#1a1a1a" },
   fieldLabel: { fontSize: 12, color: "#888", marginBottom: 4 },
